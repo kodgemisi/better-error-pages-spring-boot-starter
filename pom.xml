@@ -6,10 +6,10 @@
 
     <groupId>com.kodgemisi.summer</groupId>
     <artifactId>better-error-pages</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
     <packaging>jar</packaging>
 
-    <name>better-error-pages</name>
+    <name>better-error-pages</name><!-- Don't change this value, it's used as jar value and also used in implementation -->
     <description>Rails like error pages for Spring Boot applications</description>
     <url>https://github.com/kodgemisi/better-error-pages</url>
 

@@ -43,6 +43,7 @@ import java.util.List;
  * @author destan
  */
 @Configuration
+@BetterErrorPagesEnabled({"dev", "development"})
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @ConditionalOnClass({ Servlet.class, DispatcherServlet.class, SpringTemplateEngine.class })
 @ConditionalOnMissingBean(value = ErrorController.class, search = SearchStrategy.CURRENT)

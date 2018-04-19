@@ -157,12 +157,8 @@ the Mozilla Public License, v. 2.0.
 <main>
     <h2>User friendly message</h2>
 
-    <th:block
-            th:if="${#arrays.contains(@environment.getActiveProfiles(),'dev') || #arrays.contains(@environment.getActiveProfiles(),'test')}"
-            th:with="errorContextList=${thymeleafExceptionUtils.getListOfErrorContext(trace)}"
-    >
+    <th:block th:with="errorContextList=${thymeleafExceptionUtils.getListOfErrorContext(trace)}">
         <hr>
-
         <th:block th:if="${!errorContextList.empty}">
             <h2>[[${message}]]</h2>
 
@@ -231,7 +227,6 @@ the Mozilla Public License, v. 2.0.
                 }
             </script>
         </th:block>
-        <p th:if="${exception == null}">No exception found.</p>
 
         <button onclick="document.getElementById('dump').style.display='block'">Show Dump</button>
 

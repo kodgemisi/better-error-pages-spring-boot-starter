@@ -15,6 +15,7 @@ package com.kodgemisi.summer;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.lang.NonNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +24,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
@@ -72,7 +74,13 @@ public class ThymeleafExceptionUtils {
 		return colorizeTrace(trace);
 	}
 
+	@NonNull
 	public List<ErrorContext> getListOfErrorContext(String trace) {
+
+		if(trace == null) {
+			log.debug("Trace is null, if you think there should be a trace please make sure that you have server.error.include-stacktrace=always");
+			return Collections.emptyList();
+		}
 
 		final List<ErrorContext> errorContexts = getErrorContexts(trace);
 

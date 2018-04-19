@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.kodgemisi.summer</groupId>
-    <artifactId>better-error-pages</artifactId>
-    <version>0.1.1</version>
+    <artifactId>better-error-pages-spring-boot-starter</artifactId>
+    <version>0.2.0</version>
     <packaging>jar</packaging>
 
     <name>better-error-pages</name><!-- Don't change this value, it's used as jar value and also used in implementation -->

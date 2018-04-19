@@ -9,7 +9,10 @@
     <version>0.2.0</version>
     <packaging>jar</packaging>
 
-    <name>better-error-pages</name><!-- Don't change this value, it's used as jar value and also used in implementation -->
+    <!-- Don't change this value (name), it's used as jar value and also used in implementation -->
+    <!--Name should be the same with Github repo name as long as this artifact is served via Jitpack-->
+    <name>better-error-pages-spring-boot-starter</name>
+
     <description>Rails like error pages for Spring Boot applications</description>
     <url>https://github.com/kodgemisi/better-error-pages</url>
 

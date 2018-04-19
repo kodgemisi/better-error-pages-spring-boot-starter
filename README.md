@@ -1,8 +1,15 @@
 # Better Error Pages
 
-Rails like error pages for Spring Boot applications.
+This is a `Spring Boot Starter` project which provides Rails like error pages for Spring Boot applications for development environments.
 
-## Prerequisites
+## Usage
+
+Just add the dependency to your maven/gradle of your Spring Boot application then it will autoconfigure itself and
+_Better Error Pages_ will be available if your active profiles includes `dev` or `development`.
+
+You can change profiles in which _Better Error Pages_ will be enabled via `better-error-pages.profiles` property.
+
+## Installation
 
 Your project must have **one of** following files:
 
@@ -16,14 +23,27 @@ and `better-error-pages.package-name` property must be set.
 Add the dependency to your project
 
 ```xml
-<dependency>
-	    <groupId>com.github.kodgemisi</groupId>
-	    <artifactId>better-error-pages</artifactId>
-	    <version>${better-error-pages.version}</version>
-	</dependency>
+	<dependencies>
+	  <dependency>
+		    <groupId>com.github.kodgemisi</groupId>
+		    <artifactId>better-error-pages-spring-boot-starter</artifactId>
+		    <version>${better-error-pages-spring-boot-starter.version}</version>
+		</dependency>
+	</dependencies>
+
+	<repositories>
+		<repository>
+		    <id>jitpack.io</id>
+		    <url>https://jitpack.io</url>
+		</repository>
+	</repositories>
 ```
 
-See https://jitpack.io/#kodgemisi/better-error-pages for Jitpack usage, dependency details and version info.
+See https://jitpack.io/#kodgemisi/better-error-pages-spring-boot-starter for Jitpack usage, dependency details, version info and Gradle usage.
+
+Then any error page will look like following:
+
+![Screenshot](docs/screenshot.png)
 
 ## Configuration
 
@@ -32,6 +52,8 @@ better-error-pages:
   package-name: <String> # A package name whose classes' source code will be parsed and displayed in error pages. Mandatory.
   profiles: <Coma separated string> # Override default profiles to enable Better Error Pages. Default value: "dev, development"
 ```
+
+Note that `package-name` should be typically your own base package which is used througout your own classes like `com.yourcompany`.
 
 ## Limitations
 

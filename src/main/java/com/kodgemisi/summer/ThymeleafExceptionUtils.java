@@ -71,6 +71,9 @@ public class ThymeleafExceptionUtils {
 	}
 
 	public String styledTrace(String trace) {
+		if(trace == null) {
+			return null;
+		}
 		return colorizeTrace(trace);
 	}
 

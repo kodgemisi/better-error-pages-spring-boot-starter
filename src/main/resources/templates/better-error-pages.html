@@ -49,6 +49,26 @@ the Mozilla Public License, v. 2.0.
             line-height: 25px;
         }
 
+        table {
+            table-layout:fixed;
+            width: 100%;
+            border-spacing: 0;
+        }
+        td {
+            padding: 5px;
+            word-wrap:break-word
+        }
+        table, tr, td {
+            border: 0;
+        }
+
+        td:first-child {
+            width: 250px;
+        }
+        tr:nth-child(odd) {
+            background-color: #eee;
+        }
+
         a, a:visited { color: #980905; }
         a:hover { color: #C52F24; }
         a.trace-frames { color: #666; }
@@ -145,8 +165,67 @@ the Mozilla Public License, v. 2.0.
                 opacity: 0;
             }
         }
-    </style>
 
+        .details {
+            border: 1px solid #D0D0D0;
+            border-radius: 4px;
+            margin: 1em 0px;
+            display: block;
+        }
+
+        .summary {
+            padding: 8px 15px;
+            border-bottom: 1px solid #D0D0D0;
+            display: block;
+        }
+
+        .details pre {
+            margin: 5px;
+            border: none;
+        }
+
+        #searchBox {
+            position: absolute;
+            top: 0;
+            left: 0;
+            padding: 15px;
+            background-color: rgba(0,0,0,.7);
+            border-radius: 3px;
+            display: none;
+        }
+        #searchBox img {
+            vertical-align: middle;
+        }
+        #searchBox div {
+            cursor: pointer;
+            color: white;
+            padding: 5px 10px 5px 10px;
+        }
+        #searchBox a,
+        #searchBox a:visited
+        #searchBox a:focus
+        #searchBox a:active{
+            color: white;
+            text-decoration: none;
+        }
+        #searchBox a:hover {
+            color: #ddd;
+            text-decoration: none;
+        }
+    </style>
+    <script>
+        const toggle = function(id) {
+            const s = document.getElementById(id).style;
+            s.display = s.display == 'none' ? 'block' : 'none';
+            return false;
+        };
+        const show = function(id) {
+            document.getElementById(id).style.display = 'block';
+        };
+        const hide = function(id) {
+            document.getElementById(id).style.display = 'none';
+        };
+    </script>
 </head>
 <body>
 
@@ -181,8 +260,9 @@ the Mozilla Public License, v. 2.0.
                     const errorLineNumber = parseInt(el.getAttribute('errorLineNumber')) - firstLineNumber;
                     const editorEl = document.getElementById(id + 'Content');
                     const editor = ace.edit(editorEl);
-
                     editor.setOption("firstLineNumber", firstLineNumber);
+
+                    editor.commands.bindKeys({"ctrl-l":null});
                     editor.setTheme("ace/theme/eclipse");
                     editor.session.setMode("ace/mode/java");
                     editor.setReadOnly(true);
@@ -228,42 +308,98 @@ the Mozilla Public License, v. 2.0.
             </script>
         </th:block>
 
-        <button onclick="document.getElementById('dump').style.display='block'">Show Dump</button>
+        <h2 style="margin-top: 30px">Request</h2>
 
-        <section id="dump">
-            <!--/* Thanks: https://stackoverflow.com/a/42103790/878361 */-->
-            <table>
-                <caption>Variables</caption>
-                <tr th:each="var : ${#vars.getVariableNames()}">
-                    <td th:text="${var}"></td>
-                    <td th:text="${#vars.getVariable(var)}"></td>
-                </tr>
-            </table>
+        <div class="details">
+            <div class="summary"><strong>Parameters</strong></div>
+            <div id="requestParameters">
+                <table th:with="requestParameterNames=${#request.getParameterNames()}">
+                    <tr th:if="${!requestParameterNames.hasMoreElements()}">
+                        <td>None</td>
+                    </tr>
+                    <tr th:each="requestParameterName : ${requestParameterNames}">
+                        <td th:text="${requestParameterName}"></td>
+                        <td th:text="${#request.getParameter(requestParameterName)}"></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
 
-            <table>
-                <caption>Request Parameters</caption>
-                <tr th:each="entry : ${#vars.getVariable('param').entrySet()}">
-                    <td th:text="${entry.key}"></td>
-                    <td th:text="${entry.value}"></td>
-                </tr>
-            </table>
+        <div class="details">
+            <div class="summary"><strong>Headers</strong></div>
+            <div id="requestHeaders">
+                <table th:with="requestHeaderNames=${#request.getHeaderNames()}">
+                    <tr th:if="${!requestHeaderNames.hasMoreElements()}">
+                        <td>None</td>
+                    </tr>
+                    <tr th:each="requestHeaderName : ${requestHeaderNames}">
+                        <td th:text="${requestHeaderName}"></td>
+                        <td th:text="${#request.getHeader(requestHeaderName)}"></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
 
-            <table>
-                <caption>Session Attributes</caption>
-                <tr th:each="entry : ${#vars.getVariable('session').entrySet()}">
-                    <td th:text="${entry.key}"></td>
-                    <td th:text="${entry.value}"></td>
-                </tr>
-            </table>
+        <div class="details">
+            <div class="summary"><a href="#" onclick="return toggle('requestAttributes')">Toggle request attributes</a></div>
+            <div id="requestAttributes" style="display:none">
+                <table th:with="requestAttributeNames=${#request.getAttributeNames()}">
+                    <tr th:if="${!requestAttributeNames.hasMoreElements()}">
+                        <td>None</td>
+                    </tr>
+                    <tr th:each="requestAttributeName : ${requestAttributeNames}">
+                        <td th:text="${requestAttributeName}"></td>
+                        <td th:text="${#request.getAttribute(requestAttributeName)}"></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
 
-            <table>
-                <caption>Servlet Context Attributes</caption>
-                <tr th:each="entry : ${#vars.getVariable('application').entrySet()}">
-                    <td th:text="${entry.key}"></td>
-                    <td th:text="${entry.value}"></td>
-                </tr>
-            </table>
-        </section>
+        <div class="details">
+            <div class="summary"><a href="#" onclick="return toggle('sessionAttributes')">Toggle session attributes</a></div>
+            <div id="sessionAttributes" th:with="sessionAttributes=${#vars.getVariable('session').entrySet()}" th:style="${sessionAttributes.isEmpty()} ? '' : 'display:none'">
+                <table>
+                    <tr th:if="${sessionAttributes.isEmpty()}">
+                        <td>None</td>
+                    </tr>
+                    <tr th:each="entry : ${sessionAttributes}">
+                        <td th:text="${entry.key}"></td>
+                        <td th:text="${entry.value}"></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <h2 style="margin-top: 30px">Response</h2>
+
+        <div class="details">
+            <div class="summary"><strong>Headers</strong></div>
+            <div id="responseHeaders">
+                <table th:with="responseHeaders=${#response.getHeaderNames()}">
+                    <tr th:if="${responseHeaders.isEmpty()}">
+                        <td>None</td>
+                    </tr>
+                    <tr th:each="headerName : ${responseHeaders}">
+                        <td th:text="${headerName}"></td>
+                        <td th:text="${#response.getHeader(headerName)}"></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <h2 style="margin-top: 30px">Template Context</h2>
+
+        <div class="details">
+            <div class="summary"><a href="#" onclick="return toggle('variableDump')">Toggle variable dump</a></div>
+            <div id="variableDump" style="display:none">
+                <table><!--/* Thanks: https://stackoverflow.com/a/42103790/878361 */-->
+                    <tr th:each="var : ${#vars.getVariableNames()}">
+                        <td th:text="${var}"></td>
+                        <td th:text="${#vars.getVariable(var)}"></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
 
         <script>
             {
@@ -289,14 +425,46 @@ the Mozilla Public License, v. 2.0.
                         copyMessageEl.classList.add('show');
                         setTimeout(() => {
                             copyMessageEl.classList.remove('show');
-                            copyMessageEl.classList.add('hide');
-                        }, 1200);
+                        copyMessageEl.classList.add('hide');
+                    }, 1200);
                     }
                 }
             }
         </script>
+        <script>
+            document.addEventListener('mouseup', function(e){
+                const thetext = window.getSelection().toString();
+                if (thetext.length > 0){
+                    document.getElementById('searchBox').style.top = e.pageY + 'px';
+                    document.getElementById('searchBox').style.left = e.pageX + 'px';
+                    document.getElementById('searchBox').style.display = 'block';
+
+                    const searchInGoogleEl = document.getElementById('searchInGoogle');
+                    searchInGoogleEl.setAttribute('href', searchInGoogleEl.getAttribute('orig-href') + thetext);
+
+                    const searchInStackoverflowEl = document.getElementById('searchInStackoverflow');
+                    searchInStackoverflowEl.setAttribute('href', searchInStackoverflowEl.getAttribute('orig-href') + thetext);
+                }
+            }, false);
+
+            document.addEventListener('click', function(e){
+                if (window.getSelection().toString().trim().length === 0){
+                    document.getElementById('searchBox').style.display = 'none';
+                }
+            }, false);
+        </script>
         <div id="selectionArea" style="color: transparent;position: fixed;top:-100px;"></div>
         <div id="copyMessage">Copied to clipboard.<br><span></span></div>
+        <div id="searchBox">
+            <div>
+                <svg style="width: 20px;margin:0 5px 0 5px;vertical-align: middle;" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 48 48"><defs><path id="a" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z"/></defs><clipPath id="b"><use xlink:href="#a" overflow="visible"/></clipPath><path clip-path="url(#b)" fill="#FBBC05" d="M0 37V11l17 13z"/><path clip-path="url(#b)" fill="#EA4335" d="M0 11l17 13 7-6.1L48 14V0H0z"/><path clip-path="url(#b)" fill="#34A853" d="M0 37l30-23 7.9 1L48 0v48H0z"/><path clip-path="url(#b)" fill="#4285F4" d="M48 48L17 24l-4-3 35-10z"/></svg>
+                <a id="searchInGoogle" target="_blank" orig-href="https://www.google.com/search?q=">Search in Google</a>
+            </div>
+            <div>
+                <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 120 120" style="vertical-align: middle;width: 30px;enable-background:new 0 0 120 120;" xml:space="preserve"> <style type="text/css"> .st0{fill:#BCBBBB;} .st1{fill:#F48023;} </style> <polygon class="st0" points="84.4,93.8 84.4,70.6 92.1,70.6 92.1,101.5 22.6,101.5 22.6,70.6 30.3,70.6 30.3,93.8 "/> <path class="st1" d="M38.8,68.4l37.8,7.9l1.6-7.6l-37.8-7.9L38.8,68.4z M43.8,50.4l35,16.3l3.2-7l-35-16.4L43.8,50.4z M53.5,33.2 l29.7,24.7l4.9-5.9L58.4,27.3L53.5,33.2z M72.7,14.9l-6.2,4.6l23,31l6.2-4.6L72.7,14.9z M38,86h38.6v-7.7H38V86z"/> </svg>
+                <a id="searchInStackoverflow" target="_blank" orig-href="https://stackoverflow.com/search?q=">Search in Stackoverflow</a>
+            </div>
+        </div>
     </th:block>
 </main>
 </body>

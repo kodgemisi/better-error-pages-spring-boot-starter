@@ -61,7 +61,7 @@ public class ThymeleafExceptionUtils {
 	protected ThymeleafExceptionUtils(String projectPath, String packageName) {
 		this.projectPath = projectPath;
 		this.packageName = packageName;
-		classNameRegexPattern = Pattern.compile("at ((" + this.packageName + "[a-z0-9\\.]+)\\.([A-Z]\\w*)).*\\((.+):(\\d+)\\)");
+		classNameRegexPattern = Pattern.compile("at ((" + this.packageName + "[a-z0-9\\.]*)\\.([A-Z]\\w*)).*\\((.+):(\\d+)\\)");
 	}
 
 	private String colorizeTrace(String trace) {
@@ -78,7 +78,7 @@ public class ThymeleafExceptionUtils {
 	public List<ErrorContext> getListOfErrorContext(String trace) {
 
 		if(trace == null) {
-			log.debug("Trace is null, if you think there should be a trace please make sure that you have server.error.include-stacktrace=always");
+			log.warn("Trace is null, this is normal for 404 errors but if error is different and you think there should be a trace please make sure that you have server.error.include-stacktrace=always");
 			return Collections.emptyList();
 		}
 

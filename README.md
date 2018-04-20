@@ -2,50 +2,55 @@
 
 This is a `Spring Boot Starter` project which provides Rails like error pages for Spring Boot applications for development environments.
 
-## Usage
+![Screenshot](docs/screenshot.png)
+
+## Quick Start
 
 Just add the dependency to your maven/gradle of your Spring Boot application then it will autoconfigure itself and
 _Better Error Pages_ will be available if your active profiles includes `dev` or `development`.
 
-You can change profiles in which _Better Error Pages_ will be enabled via `better-error-pages.profiles` property.
+**Adding the dependency to your project**
 
-## Installation
+```xml
+<dependencies>
+  <dependency>
+    <groupId>com.github.kodgemisi</groupId>
+    <artifactId>better-error-pages-spring-boot-starter</artifactId>
+    <version>${better-error-pages-spring-boot-starter.version}</version>
+  </dependency>
+</dependencies>
 
-Your project must have **one of** following files:
+<repositories>
+  <repository>
+    <id>jitpack.io</id>
+    <url>https://jitpack.io</url>
+  </repository>
+</repositories>
+```
+
+See https://jitpack.io/#kodgemisi/better-error-pages-spring-boot-starter for Jitpack usage, dependency details, version info and Gradle usage.
+
+## Configuration
+
+Better Error Pages;
+
+* sets `server.error.include-stacktrace: always` and `server.error.include-exception: true` automatically.
+* autoconfigures itself if active profile has `dev` or `development` however you can override this via `better-error-pages.profiles` property.
+* finds your `@SpringBootApplication` annotated class and use its package name as `better-error-pages.package-name` name however you can override this via `better-error-pages.package-name` property.
+
+<span style="color: darkorange;font-weight: bold;">⚠</span>
+Setting `better-error-pages.package-name` property improves startup performance significantly but won't affect runtime performance.
+
+<span style="color: darkorange;font-weight: bold;">⚠</span>
+If you set `better-error-pages.package-name` property then your project must have **one of** following files:
 
 * application.yml
 * application-dev.yml
 * application.properties
 * application-dev.properties
 
-and `better-error-pages.package-name` property must be set.
-
-Add the dependency to your project
-
-```xml
-	<dependencies>
-	  <dependency>
-		    <groupId>com.github.kodgemisi</groupId>
-		    <artifactId>better-error-pages-spring-boot-starter</artifactId>
-		    <version>${better-error-pages-spring-boot-starter.version}</version>
-		</dependency>
-	</dependencies>
-
-	<repositories>
-		<repository>
-		    <id>jitpack.io</id>
-		    <url>https://jitpack.io</url>
-		</repository>
-	</repositories>
-```
-
-See https://jitpack.io/#kodgemisi/better-error-pages-spring-boot-starter for Jitpack usage, dependency details, version info and Gradle usage.
-
-Then any error page will look like following:
-
-![Screenshot](docs/screenshot.png)
-
-## Configuration
+<span style="color: blue;font-weight: bold;">🛈</span>
+Note that `package-name` should be typically your own base package which is used throughout your own classes like `com.yourcompany`.
 
 ```yaml
 better-error-pages:
@@ -53,13 +58,10 @@ better-error-pages:
   profiles: <Coma separated string> # Override default profiles to enable Better Error Pages. Default value: "dev, development"
 ```
 
-Note that `package-name` should be typically your own base package which is used througout your own classes like `com.yourcompany`.
-
 ## Limitations
 
-Won't work for
-
-* package names containing upper case characters
+* Won't work for package names containing upper case characters.
+* Can't show source code in multi module projects but other features will work.
 
 ## Troubleshooting
 

@@ -25,14 +25,13 @@ class BetterErrorPagesEnabledCondition implements Condition {
 
 	@Override
 	public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
-		MultiValueMap<String, Object> attrs = metadata.getAllAnnotationAttributes(BetterErrorPagesEnabled.class.getName());
-
 		final String overrideDefaultProfiles = context.getEnvironment().getProperty("better-error-pages.profiles");
-		if(overrideDefaultProfiles != null) {
+
+		if (overrideDefaultProfiles != null) {
 
 			log.trace("better-error-pages.profiles found {}", overrideDefaultProfiles);
 
-			if(overrideDefaultProfiles.trim().isEmpty()) {
+			if (overrideDefaultProfiles.trim().isEmpty()) {
 				throw new IllegalArgumentException("better-error-pages.profiles cannot be empty. Either delete the property or give it a valid value.");
 			}
 
@@ -43,7 +42,10 @@ class BetterErrorPagesEnabledCondition implements Condition {
 
 			return enabled;
 		}
-		else if (attrs != null) {
+
+		MultiValueMap<String, Object> attrs = metadata.getAllAnnotationAttributes(ConditionalOnActiveProfiles.class.getName());
+
+		if (attrs != null) {
 
 			log.trace("better-error-pages.profiles is not found. Checking for 'dev' and 'development' profiles...");
 

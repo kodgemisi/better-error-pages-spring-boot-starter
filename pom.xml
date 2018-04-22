@@ -6,7 +6,7 @@
 
     <groupId>com.kodgemisi.summer</groupId>
     <artifactId>better-error-pages-spring-boot-starter</artifactId>
-    <version>0.2.2</version>
+    <version>0.2.3-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <!-- Don't change this value (name), it's used as jar value and also used in implementation -->

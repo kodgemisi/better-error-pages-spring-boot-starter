@@ -20,11 +20,11 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Conditional(BetterErrorPagesEnabledCondition.class)
-public @interface BetterErrorPagesEnabled {
+public @interface ConditionalOnActiveProfiles {
 
 	/**
 	 * The set of profiles for which the annotated component should be registered.
 	 */
-	String[] value();
+	String[] value() default {"dev", "development"};
 
 }

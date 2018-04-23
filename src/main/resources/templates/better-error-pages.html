@@ -197,6 +197,7 @@ the Mozilla Public License, v. 2.0.
             background-color: rgba(0,0,0,.7);
             border-radius: 3px;
             display: none;
+            z-index: 1;
         }
         #searchBox img {
             vertical-align: middle;
@@ -232,7 +233,7 @@ the Mozilla Public License, v. 2.0.
 
         <th:block th:if="${!errorContextList.empty}" th:each="errorContext, iterStat : ${errorContextList}">
 
-            <section class="code-editor" th:classappend="${iterStat.first}? 'show'" th:id="${errorContext.id}" th:firstLineNumber="${errorContext.firstLineNumber}" th:errorLineNumber="${errorContext.errorLineNumber}">
+            <section class="code-editor" th:classappend="${iterStat.first}? 'show'" th:id="${errorContext.id}" th:firstLineNumber="${errorContext.firstLineNumber}" th:errorLineNumber="${errorContext.errorLineNumber}" th:fileType="${errorContext.fileType}">
                 <p class="code-editor-title">
                     Source of [[${errorContext.className}]] (Around line <strong>#[[${errorContext.errorLineNumber}]]</strong>)
                     <i class="clipboard" th:title="${'Copy error location: ' + errorContext.className + ':' + errorContext.errorLineNumber}" th:errorLocation="${errorContext.className + ':' + errorContext.errorLineNumber}">📋</i></p>
@@ -246,6 +247,7 @@ the Mozilla Public License, v. 2.0.
 
                 function initializeSourceCodeEditor(el) {
                     const id = el.getAttribute('id');
+                    const fileType = el.getAttribute('fileType').toLowerCase();
                     const firstLineNumber = parseInt(el.getAttribute('firstLineNumber'));
                     const errorLineNumber = parseInt(el.getAttribute('errorLineNumber')) - firstLineNumber;
                     const editorEl = document.getElementById(id + 'Content');
@@ -254,8 +256,9 @@ the Mozilla Public License, v. 2.0.
 
                     editor.commands.bindKeys({"ctrl-l":null});
                     editor.setTheme("ace/theme/eclipse");
-                    editor.session.setMode("ace/mode/java");
+                    editor.session.setMode("ace/mode/" + fileType);
                     editor.setReadOnly(true);
+                    editor.getSession().setUseWorker(false);
                     editor.session.addMarker(
                         new ace.Range(errorLineNumber, 0, errorLineNumber, 1), "error-highlight", "fullLine"
                     );

@@ -20,6 +20,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * Created on April, 2018
  *
  * @author destan
+ * @author sedooe
  */
 @ConfigurationProperties(prefix = "better-error-pages")
 @Getter

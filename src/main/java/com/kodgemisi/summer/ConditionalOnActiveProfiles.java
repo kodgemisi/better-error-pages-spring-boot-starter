@@ -16,6 +16,11 @@ import org.springframework.context.annotation.Conditional;
 
 import java.lang.annotation.*;
 
+/**
+ * Created on April, 2018
+ *
+ * @author sedooe
+ */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented

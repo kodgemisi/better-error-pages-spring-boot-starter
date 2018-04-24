@@ -172,12 +172,12 @@ class BetterErrorPagesAutoconfigurer {
 		// When host project runs as jar it reports resource path with file: prefix
 		// like file:/home/johndoe/development/workspaces/hostprojectname/target/hostprojectname-1.0.0.jar!/BOOT-INF/classes!/application.yml
 		if (aProjectFilePath.startsWith("file:")) {
-			return aProjectFilePath.substring(5).split("target")[0] + "src/main/java/";
+			return aProjectFilePath.substring(5).split("target")[0];
 		}
 
 		// When host project runs from IDE instead of run as a jar then it reports the properties' file path without file: prefix and with
 		// like /home/johndoe/development/workspaces/hostprojectname/target/classes/application.yml
-		return aProjectFilePath.split("target")[0] + "src/main/java/";
+		return aProjectFilePath.split("target")[0];
 	}
 
 }

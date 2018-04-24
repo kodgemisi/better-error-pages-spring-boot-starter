@@ -16,6 +16,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,7 +43,9 @@ public class ThymeleafExceptionUtils {
 
 	private static final String SPAN_END = "</span>";
 
-	private final String projectPath;
+	private final String projectPathForJavaFiles;
+
+	private final String projectPathForTemplateFiles;
 
 	private final String packageName;
 
@@ -56,10 +59,24 @@ public class ThymeleafExceptionUtils {
 	 */
 	private final Pattern classNameRegexPattern;
 
+	/**
+	 * matcher.group(0): whole line
+	 * matcher.group(1): template name
+	 * matcher.group(2): line number
+	 */
+	private final Pattern templateNameRegexPattern = Pattern.compile("Caused by: .*\\(template: \"(.+)\" - line (\\d)+, col .+\\)");
+
+	/**
+	 * matcher.group(0): whole line
+	 * matcher.group(1): template path
+	 */
+	private final Pattern templatePathRegexPattern = Pattern.compile("\\(template:.*\\[(.*)\\]\"\\)");// \(template:.*\[(.*)\]"\)
+
 	//Maybe for future use, Last Caused by regex: `"Caused by:(?:.(?!Caused by:))+$"`
 
 	protected ThymeleafExceptionUtils(String projectPath, String packageName) {
-		this.projectPath = projectPath;
+		this.projectPathForJavaFiles = projectPath + "src/main/java/";
+		this.projectPathForTemplateFiles = projectPath + "src/main/resources/";
 		this.packageName = packageName;
 		classNameRegexPattern = Pattern.compile("at ((" + this.packageName + "[a-z0-9\\.]*)\\.([A-Z]\\w*)).*\\((.+):(\\d+)\\)");
 	}
@@ -94,13 +111,14 @@ public class ThymeleafExceptionUtils {
 			}
 
 			try {
-				final Path sourceFilePath = Paths.get(projectPath, classFileRelativePath);
+				final String basePath = errorContext.getFileType() == ErrorContext.FileType.HTML ? projectPathForTemplateFiles : projectPathForJavaFiles;
+				final Path sourceFilePath = Paths.get(basePath, classFileRelativePath);
 
 				if(log.isTraceEnabled()) {
 					log.trace("sourceFilePath is {}", sourceFilePath);
 				}
 
-				final int firstLineNumber = errorContext.getErrorLineNumber() - 6;
+				final int firstLineNumber = Math.max(errorContext.getErrorLineNumber() - 6, 0);
 				final int lastLineNumber = errorContext.getErrorLineNumber() + 5;
 				final AtomicInteger index = new AtomicInteger();
 
@@ -127,26 +145,40 @@ public class ThymeleafExceptionUtils {
 		final Matcher matcher = classNameRegexPattern.matcher(trace);
 		List<ErrorContext> errorContexts = new ArrayList<>();
 		while(matcher.find() && matcher.groupCount() > 0) {
-			errorContexts.add(new ErrorContext(matcher));
+			errorContexts.add(ErrorContext.extractFromClassMatcher(matcher));
 		}
+
+		if(errorContexts.isEmpty()) {
+			final Matcher matcherForTemplateMeta = templateNameRegexPattern.matcher(trace);
+			final Matcher matcherForTemplatePath = templatePathRegexPattern.matcher(trace);
+			while(matcherForTemplateMeta.find() && matcherForTemplateMeta.groupCount() > 0) {
+				errorContexts.add(ErrorContext.extractFromTemplateMatcher(matcherForTemplateMeta, matcherForTemplatePath));
+				break;//No need to parse the rest as they will yield the same file name for template errors
+			}
+		}
+
 		return errorContexts;
 	}
 
 	@Getter
-	private class ErrorContext {
+	private static class ErrorContext {
 
-		private final String fullyQualifiedClassName;
+		enum FileType {
+			JAVA, HTML
+		}
 
-		private final String packageName;
+		private String fullyQualifiedClassName;
 
-		private final String className;
+		private String packageName;
+
+		private String className;
 
 		/**
 		 * For inner classes and non-public classes their file name is different
 		 */
-		private final String fileName;
+		private String fileName;
 
-		private final int errorLineNumber;
+		private int errorLineNumber;
 
 		@Setter
 		private String sourceCodePath;
@@ -157,9 +189,31 @@ public class ThymeleafExceptionUtils {
 		@Setter
 		private int firstLineNumber;
 
+		private final FileType fileType;
+
 		public String getId() {
 			return fullyQualifiedClassName + ":" + errorLineNumber;
 		}
+
+		private ErrorContext(String templateName, String errorLineNumber, @Nullable String templateFullPath) {
+			this.errorLineNumber = Integer.parseInt(errorLineNumber);
+
+			this.packageName = "";
+			this.fileName = templateFullPath != null ? templateFullPath : "templates/" + templateName + ".html";
+			this.className = fileName;
+			this.fullyQualifiedClassName = this.fileName;
+			fileType = FileType.HTML;
+		}
+
+		private ErrorContext(String fullyQualifiedClassName, String packageName, String className, String fileName, String errorLineNumber) {
+			this.fullyQualifiedClassName = fullyQualifiedClassName;
+			this.packageName = packageName;
+			this.className = className;
+			this.fileName = fileName;
+			this.errorLineNumber = Integer.parseInt(errorLineNumber);
+			fileType = FileType.JAVA;
+		}
+
 
 		/**
 		 * <pre>
@@ -171,16 +225,13 @@ public class ThymeleafExceptionUtils {
 		 * matcher.group(5): line number like 69
 		 * </pre>
 		 */
-		ErrorContext(Matcher matcher) {
-			this(matcher.group(1), matcher.group(2), matcher.group(3), matcher.group(4), matcher.group(5));
+		static ErrorContext extractFromClassMatcher(Matcher matcher) {
+			return new ErrorContext(matcher.group(1), matcher.group(2), matcher.group(3), matcher.group(4), matcher.group(5));
 		}
 
-		private ErrorContext(String fullyQualifiedClassName, String packageName, String className, String fileName, String errorLineNumber) {
-			this.fullyQualifiedClassName = fullyQualifiedClassName;
-			this.packageName = packageName;
-			this.className = className;
-			this.fileName = fileName;
-			this.errorLineNumber = Integer.parseInt(errorLineNumber);
+		static ErrorContext extractFromTemplateMatcher(Matcher matcher, Matcher matcherForTemplatePath) {
+			final String templateFullPath = matcherForTemplatePath.find() && matcherForTemplatePath.groupCount() > 0 ? matcherForTemplatePath.group(1) : null;
+			return new ErrorContext(matcher.group(1), matcher.group(2), templateFullPath);
 		}
 
 		String getRelativePathOfClass() {

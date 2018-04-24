@@ -277,7 +277,7 @@ the Mozilla Public License, v. 2.0.
         <h3>
             Exception Stack Trace
             <a href="#cause" style="font-weight: normal;"
-               onclick="document.getElementById('trace').scrollTop = document.getElementById('cause').offsetTop;return !document.getElementById('trace').classList.contains('compact');">
+               onclick="return scrollToCause()">
                 Go to root cause</a>
             <a href="#" style="font-weight: normal;" onclick="toggleFullTrace();return false;">Toggle full trace</a>
         </h3>
@@ -491,6 +491,20 @@ the Mozilla Public License, v. 2.0.
     const toggleFullTrace = function () {
         const traceEl = document.getElementById('trace');
         traceEl.classList.contains('compact') ? traceEl.classList.remove('compact') : traceEl.classList.add('compact');
+        return false;
+    };
+    const scrollToCause = function () {
+        const currentScrollY = window.scrollY;
+        document.getElementById('cause').scrollIntoView();
+
+        const shouldRestorePageScroll = document.getElementById('trace').classList.contains('compact');
+
+        if(shouldRestorePageScroll) {
+            window.scroll({
+                top: currentScrollY,
+                behavior: 'instant'
+            });
+        }
         return false;
     }
 </script>

@@ -20,11 +20,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * Created on April, 2018
  *
  * @author destan
+ * @author sedooe
  */
 @ConfigurationProperties(prefix = "better-error-pages")
 @Getter
 @Setter
-public class BetterErrorPagesConfig {
+class BetterErrorPagesConfigurationProperties {
 
 	/**
 	 * A package name whose classes' source code will be parsed and displayed in error pages.
@@ -34,6 +35,5 @@ public class BetterErrorPagesConfig {
 	/**
 	 * Override default profiles to enable Better Error Pages.
 	 */
-	private String profiles = "dev, development";
-
+	private String[] profiles = {"dev", "development"};
 }

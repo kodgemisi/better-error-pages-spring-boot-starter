@@ -29,9 +29,7 @@ import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConf
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorViewResolver;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.boot.web.servlet.error.ErrorController;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.*;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
@@ -51,7 +49,7 @@ import java.util.Set;
  * @author destan
  */
 @Configuration
-@BetterErrorPagesEnabled({"dev", "development"})
+@ConditionalOnActiveProfiles
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @ConditionalOnClass({ Servlet.class, DispatcherServlet.class, SpringTemplateEngine.class })
 @ConditionalOnMissingBean(value = ErrorController.class, search = SearchStrategy.CURRENT)

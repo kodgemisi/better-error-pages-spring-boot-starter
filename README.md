@@ -4,6 +4,12 @@ This is a `Spring Boot Starter` project which provides Rails like error pages fo
 
 ![Screenshot](docs/screenshot.png)
 
+## Demo
+
+https://better-error-pages-demo.herokuapp.com
+
+Note that this is a heroku app so it may be sleeping for when you first open the page, it may take 1-2 min for server to wake up.
+
 ## Quick Start
 
 Just add the dependency to your maven/gradle of your Spring Boot application then it will autoconfigure itself and

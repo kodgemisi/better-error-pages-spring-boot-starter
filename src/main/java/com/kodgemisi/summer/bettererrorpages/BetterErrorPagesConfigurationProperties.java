@@ -10,7 +10,7 @@
  *
  */
 
-package com.kodgemisi.summer;
+package com.kodgemisi.summer.bettererrorpages;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -276,9 +276,7 @@ the Mozilla Public License, v. 2.0.
 
         <h3>
             Exception Stack Trace
-            <a href="#cause" style="font-weight: normal;"
-               onclick="return scrollToCause()">
-                Go to root cause</a>
+            <a href="#cause" style="font-weight: normal;" onclick="return scrollToCause()">Go to root cause</a>
             <a href="#" style="font-weight: normal;" onclick="toggleFullTrace();return false;">Toggle full trace</a>
         </h3>
         <pre id="trace" class="compact" th:utext="${thymeleafExceptionUtils.styledTrace(trace)}"></pre>
@@ -478,8 +476,8 @@ the Mozilla Public License, v. 2.0.
 <!--/* Util functions */-->
 <script>
     const toggle = function(id) {
-        const s = document.getElementById(id).style;
-        s.display = s.display == 'none' ? 'block' : 'none';
+        const el = document.getElementById(id).style;
+        el.display = el.display == 'none' ? 'block' : 'none';
         return false;
     };
     const show = function(id) {

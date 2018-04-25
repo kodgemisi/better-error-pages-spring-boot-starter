@@ -10,7 +10,7 @@
  *
  */
 
-package com.kodgemisi.summer;
+package com.kodgemisi.summer.bettererrorpages;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,7 +52,7 @@ import java.util.Set;
 @ConditionalOnActiveProfiles
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @ConditionalOnClass({ Servlet.class, DispatcherServlet.class, SpringTemplateEngine.class })
-@ConditionalOnMissingBean(value = ErrorController.class, search = SearchStrategy.CURRENT)
+//@ConditionalOnMissingBean(value = ErrorController.class, search = SearchStrategy.CURRENT)
 @AutoConfigureBefore({ ErrorMvcAutoConfiguration.class, WebMvcAutoConfiguration.class })
 @AllArgsConstructor
 @Slf4j
@@ -66,7 +66,7 @@ class BetterErrorPagesAutoconfigurer {
 
 	/**
 	 * <p>
-	 * If return type is {@link org.springframework.boot.web.servlet.error.ErrorController} and {@link com.kodgemisi.summer.BetterErrorPagesController}
+	 * If return type is {@link org.springframework.boot.web.servlet.error.ErrorController} and {@link BetterErrorPagesController}
 	 * is not instantiated before {@link org.springframework.web.servlet.handler.AbstractHandlerMethodMapping} kicks in
 	 * then {@link org.springframework.beans.factory.support.AbstractBeanFactory#getType(java.lang.String)}
 	 * resolves beanType as ErrorController which eventually results in not evaluating/assuming our class as a controller and not registering {@code /error} mapping.

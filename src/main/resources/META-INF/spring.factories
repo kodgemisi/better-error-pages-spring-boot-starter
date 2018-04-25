@@ -1,1 +1,1 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.kodgemisi.summer.BetterErrorPagesAutoconfigurer
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.kodgemisi.summer.bettererrorpages.BetterErrorPagesAutoconfigurer

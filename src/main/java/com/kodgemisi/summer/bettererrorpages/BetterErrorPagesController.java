@@ -10,14 +10,12 @@
  *
  */
 
-package com.kodgemisi.summer;
+package com.kodgemisi.summer.bettererrorpages;
 
 import org.springframework.boot.autoconfigure.web.ErrorProperties;
 import org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorViewResolver;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -36,7 +34,6 @@ import java.util.Map;
  * @author destan
  */
 @Controller
-@Order(Ordered.HIGHEST_PRECEDENCE)
 @RequestMapping("${server.error.path:${error.path:/error}}")
 public class BetterErrorPagesController extends BasicErrorController {
 

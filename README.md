@@ -8,7 +8,7 @@ This is a `Spring Boot Starter` project which provides Rails like error pages fo
 
 https://better-error-pages-demo.herokuapp.com
 
-Note that this is a heroku app so it may be sleeping for when you first open the page, it may take 1-2 min for server to wake up.
+Note that demo page is a Heroku app so it may be sleeping when you first open the page, it may take 1-2 min for server to wake up.
 
 ## Quick Start
 
@@ -61,7 +61,7 @@ Note that `package-name` should be typically your own base package which is used
 ```yaml
 better-error-pages:
   package-name: <String> # A package name whose classes' source code will be parsed and displayed in error pages. Mandatory.
-  profiles: <Coma separated string> # Override default profiles to enable Better Error Pages. Default value: "dev, development"
+  profiles: <String or List of string> # Override default profiles to enable Better Error Pages. Default value: "dev, development"
 ```
 
 ## Limitations

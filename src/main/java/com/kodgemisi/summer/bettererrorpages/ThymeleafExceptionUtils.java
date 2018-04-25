@@ -10,7 +10,7 @@
  *
  */
 
-package com.kodgemisi.summer;
+package com.kodgemisi.summer.bettererrorpages;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -32,6 +32,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ *
+ * Instances of this class are thread-safe.
+ *
  * Created on April, 2018
  *
  * @author destan
@@ -161,7 +164,7 @@ public class ThymeleafExceptionUtils {
 	}
 
 	@Getter
-	private static class ErrorContext {
+	protected static class ErrorContext {
 
 		enum FileType {
 			JAVA, HTML

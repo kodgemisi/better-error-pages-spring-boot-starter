@@ -66,7 +66,7 @@ public class ThymeleafExceptionUtils {
 	 * matcher.group(1): template path
 	 * matcher.group(2): line number
 	 */
-	private final Pattern templateNameRegexPattern = Pattern.compile("\\(template: \"(.+)\" - line (\\d)+, col .+\\)");
+	private final Pattern templateNameRegexPattern = Pattern.compile("\\(template: \"(.+)\" - line (\\d+), col .+\\)");
 
 	//Maybe for future use, Last Caused by regex: `"Caused by:(?:.(?!Caused by:))+$"`
 

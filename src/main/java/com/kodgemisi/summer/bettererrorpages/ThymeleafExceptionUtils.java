@@ -41,6 +41,10 @@ import java.util.regex.Pattern;
 @Slf4j
 public class ThymeleafExceptionUtils {
 
+	private static final String TEMPLATES_PATH = "templates/";
+
+	public static final String TEMPLATES_SUFFIX = ".html";
+
 	private static final String SPAN_START = "<span class=\"own-class\">";
 
 	private static final String SPAN_END = "</span>";
@@ -118,12 +122,17 @@ public class ThymeleafExceptionUtils {
 				final int lastLineNumber = errorContext.getErrorLineNumber() + 5;
 				final AtomicInteger index = new AtomicInteger();
 
-				final String sourceCode = String.join("\n", Files.readAllLines(sourceFilePath).stream()
+				String sourceCode = String.join("\n", Files.readAllLines(sourceFilePath).stream()
 						.filter(s -> {
 							final int currentLineNumber = index.getAndIncrement();
 							return currentLineNumber >= firstLineNumber && currentLineNumber < lastLineNumber;
 						})
 						.toArray(String[]::new));
+
+				// When the first line is a blank line than ACE editor ignores it, this is a fix for this behavior.
+				if(sourceCode.startsWith("\n")) {
+					sourceCode = " " + sourceCode;
+				}
 
 				errorContext.setFirstLineNumber(firstLineNumber + 1);
 				errorContext.setSourceCode(sourceCode);
@@ -135,6 +144,23 @@ public class ThymeleafExceptionUtils {
 			}
 		}
 		return errorContexts;
+	}
+
+	/**
+	 * <p>When calling toString methods of some context objects we may encounter lazy initialization exception which would crash the page.
+	 * This method solves that issue.</p>
+	 *
+	 * <p>For example User's some fields may be lazy and SPRING_SECURITY_CONTEXT throws LazyInitializationException.</p>
+	 * @param o
+	 * @return
+	 */
+	public String toStringSafe(Object o) {
+		try {
+			return o.toString();
+		}
+		catch (Exception e) {
+			return "Lazy initialization exception in toString(): " + e.getMessage();
+		}
 	}
 
 	private List<ErrorContext> getErrorContexts(String trace) {
@@ -194,11 +220,12 @@ public class ThymeleafExceptionUtils {
 			return fullyQualifiedClassName + ":" + errorLineNumber;
 		}
 
-		private ErrorContext(String templateFullPath, String errorLineNumber) {
+		private ErrorContext(String templateName, String errorLineNumber) {
 			this.errorLineNumber = Integer.parseInt(errorLineNumber);
 
+			// If the error is in a layout then templateName comes with .html suffix due to non-standard exception reporting of Thymeleaf
+			this.fileName = templateName.endsWith(TEMPLATES_SUFFIX) ? TEMPLATES_PATH + templateName : TEMPLATES_PATH + templateName + TEMPLATES_SUFFIX;
 			this.packageName = "";
-			this.fileName = "templates/" + templateFullPath + ".html";
 			this.className = fileName;
 			this.fullyQualifiedClassName = this.fileName;
 			fileType = FileType.HTML;
@@ -236,4 +263,5 @@ public class ThymeleafExceptionUtils {
 			return this.getPackageName().replaceAll("\\.", File.separator) + File.separator + this.getFileName();
 		}
 	}
+
 }

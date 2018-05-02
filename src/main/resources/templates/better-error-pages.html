@@ -227,7 +227,7 @@ the Mozilla Public License, v. 2.0.
 </header>
 
 <main>
-    <h2>[[${message}]]</h2>
+    <h2 th:text="${message}">Error message</h2>
 
     <th:block th:if="${trace != null && !trace.isEmpty()}" th:with="errorContextList=${thymeleafExceptionUtils.getListOfErrorContext(trace)}">
 
@@ -252,15 +252,15 @@ the Mozilla Public License, v. 2.0.
                     const errorLineNumber = parseInt(el.getAttribute('errorLineNumber')) - firstLineNumber;
                     const editorEl = document.getElementById(id + 'Content');
                     const editor = ace.edit(editorEl);
-                    editor.setOption("firstLineNumber", firstLineNumber);
+                    editor.setOption('firstLineNumber', firstLineNumber);
 
                     editor.commands.bindKeys({"ctrl-l":null});
-                    editor.setTheme("ace/theme/eclipse");
-                    editor.session.setMode("ace/mode/" + fileType);
+                    editor.setTheme('ace/theme/eclipse');
+                    editor.session.setMode('ace/mode/' + fileType);
                     editor.setReadOnly(true);
                     editor.getSession().setUseWorker(false);
                     editor.session.addMarker(
-                        new ace.Range(errorLineNumber, 0, errorLineNumber, 1), "error-highlight", "fullLine"
+                        new ace.Range(errorLineNumber, 0, errorLineNumber, 1), 'error-highlight', 'fullLine'
                     );
                     editor.getSession().setAnnotations([{
                         row: errorLineNumber,
@@ -360,7 +360,7 @@ the Mozilla Public License, v. 2.0.
                 </tr>
                 <tr th:each="entry : ${sessionAttributes}">
                     <td th:text="${entry.key}"></td>
-                    <td th:text="${entry.value}"></td>
+                    <td th:text="${thymeleafExceptionUtils.toStringSafe(entry.value)}"></td>
                 </tr>
             </table>
         </div>
@@ -408,6 +408,10 @@ the Mozilla Public License, v. 2.0.
             <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 120 120" style="vertical-align: middle;width: 30px;enable-background:new 0 0 120 120;" xml:space="preserve"> <style type="text/css"> .st0{fill:#BCBBBB;} .st1{fill:#F48023;} </style> <polygon class="st0" points="84.4,93.8 84.4,70.6 92.1,70.6 92.1,101.5 22.6,101.5 22.6,70.6 30.3,70.6 30.3,93.8 "/> <path class="st1" d="M38.8,68.4l37.8,7.9l1.6-7.6l-37.8-7.9L38.8,68.4z M43.8,50.4l35,16.3l3.2-7l-35-16.4L43.8,50.4z M53.5,33.2 l29.7,24.7l4.9-5.9L58.4,27.3L53.5,33.2z M72.7,14.9l-6.2,4.6l23,31l6.2-4.6L72.7,14.9z M38,86h38.6v-7.7H38V86z"/> </svg>
             <a id="searchInStackoverflow" target="_blank" orig-href="https://stackoverflow.com/search?q=">Search in Stackoverflow</a>
         </div>
+        <div>
+            <i style=" font-size: 20px; font-style: normal; margin: 0 10px 0 7px;">📋</i>
+            <a id="copyToClipboard" target="_blank" orig-href="https://stackoverflow.com/search?q=">Copy to clipboard</a>
+        </div>
     </div>
 </main>
 
@@ -431,27 +435,15 @@ the Mozilla Public License, v. 2.0.
         document.querySelectorAll('.clipboard').forEach( el => el.onclick = copyToClipboardHandler);
         function copyToClipboardHandler() {
             const errorLocation = this.getAttribute('errorLocation');
-            const selectionAreaEl = document.getElementById('selectionArea');
-            selectionAreaEl.textContent = errorLocation;
-            window.getSelection().selectAllChildren(selectionAreaEl);
-            const isCopySuccessful = document.execCommand('copy');
-            if(isCopySuccessful) {
-                const copyMessageEl = document.getElementById('copyMessage');
-                copyMessageEl.querySelector('span').innerText = errorLocation;
-                copyMessageEl.classList.remove('hide');
-                copyMessageEl.classList.add('show');
-                setTimeout(() => {
-                    copyMessageEl.classList.remove('show');
-                copyMessageEl.classList.add('hide');
-            }, 1200);
-            }
+            copyToClipboard(errorLocation);
         }
+
     }
 </script>
 
 <!--/* Search Box */-->
 <script>
-    document.addEventListener('mouseup', function(e){
+    document.addEventListener('mouseup', function(e) {
         const thetext = window.getSelection().toString();
         if (thetext.length > 0){
             document.getElementById('searchBox').style.top = e.pageY + 'px';
@@ -463,6 +455,11 @@ the Mozilla Public License, v. 2.0.
 
             const searchInStackoverflowEl = document.getElementById('searchInStackoverflow');
             searchInStackoverflowEl.setAttribute('href', searchInStackoverflowEl.getAttribute('orig-href') + thetext);
+
+            document.getElementById('copyToClipboard').onclick = e => {
+                copyToClipboard(thetext);
+                document.getElementById('searchBox').style.display = 'none';
+            };
         }
     }, false);
 
@@ -504,6 +501,23 @@ the Mozilla Public License, v. 2.0.
             });
         }
         return false;
+    };
+
+    function copyToClipboard(text) {
+        const selectionAreaEl = document.getElementById('selectionArea');
+        selectionAreaEl.textContent = text;
+        window.getSelection().selectAllChildren(selectionAreaEl);
+        const isCopySuccessful = document.execCommand('copy');
+        if (isCopySuccessful) {
+            const copyMessageEl = document.getElementById('copyMessage');
+            copyMessageEl.querySelector('span').innerText = text;
+            copyMessageEl.classList.remove('hide');
+            copyMessageEl.classList.add('show');
+            setTimeout(() => {
+                copyMessageEl.classList.remove('show');
+            copyMessageEl.classList.add('hide');
+        }, 1200);
+        }
     }
 </script>
 

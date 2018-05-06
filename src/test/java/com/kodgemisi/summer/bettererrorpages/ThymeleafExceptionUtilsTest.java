@@ -17,6 +17,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -29,6 +30,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 
@@ -38,7 +41,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(ThymeleafExceptionUtils.class)
+@PrepareForTest({ThymeleafExceptionUtils.class, ThymeleafExceptionUtilsTest.class})
 public class ThymeleafExceptionUtilsTest {
 
 	private static final String PROJECT_PATH = "";
@@ -88,11 +91,14 @@ public class ThymeleafExceptionUtilsTest {
 	}
 
 	@Test
-	public void parseSourceCodeFragmentStartingWithEmptyLine() throws Exception {
+	public void prependSpaceCharToSourceWhenFirstVisibleLineIsEmpty() throws Exception {
 
 		Constructor<ThymeleafExceptionUtils.ErrorContext> constructor = ThymeleafExceptionUtils.ErrorContext.class.getDeclaredConstructor(String.class, String.class, String.class, String.class, String.class);
 		constructor.setAccessible(true);
-		ThymeleafExceptionUtils.ErrorContext errorContext = constructor.newInstance("com.kodgemisi.summer.bettererrorpages.ThymeleafExceptionUtils", "com.kodgemisi.summer.bettererrorpages", "ThymeleafExceptionUtils", "ThymeleafExceptionUtils.java", "79");
+		ThymeleafExceptionUtils.ErrorContext errorContext = constructor.newInstance("com.kodgemisi.summer.bettererrorpages.ThymeleafExceptionUtils", "com.kodgemisi.summer.bettererrorpages", "ThymeleafExceptionUtils", "ThymeleafExceptionUtils.java", "52");
+
+		PowerMockito.mockStatic(Files.class);
+		PowerMockito.when(Files.readAllLines(Mockito.isA(Path.class))).thenReturn(Arrays.asList(SAMPLE_SOURCE.split("\n")));
 
 		ThymeleafExceptionUtils mock = PowerMockito.mock(ThymeleafExceptionUtils.class);
 		PowerMockito.when(mock, "getErrorContexts", SAMPLE_TRACE).thenReturn(Arrays.asList(errorContext));
@@ -103,9 +109,14 @@ public class ThymeleafExceptionUtilsTest {
 
 		List<ThymeleafExceptionUtils.ErrorContext> errorContexts = mock.getListOfErrorContext(SAMPLE_TRACE);
 
+
 		assertThat(errorContexts.size(), is(1));
 		assertThat(errorContexts.iterator().next(), is(errorContext));
-		Assert.assertTrue(errorContext.getSourceCode().startsWith(SPACE_CHARACTER));
+
+		// -1 is due to lines starts with 1, arrays starts with 0
+		// Empty lines doesn't have \n as the string is already split by \n so we expect an empty line to be empty string
+		Assert.assertTrue("Original source code should have an empty line in 'firstLineNumber'th line", SAMPLE_SOURCE.split("\n")[errorContext.getFirstLineNumber()-1].isEmpty());
+		Assert.assertTrue("Source should start with a space character", errorContext.getSourceCode().startsWith(SPACE_CHARACTER));
 	}
 
 }

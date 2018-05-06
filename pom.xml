@@ -6,10 +6,10 @@
 
     <groupId>com.kodgemisi.summer</groupId>
     <artifactId>better-error-pages-spring-boot-starter</artifactId>
-    <version>0.3.3</version>
+    <version>0.3.4</version>
     <packaging>jar</packaging>
 
-    <!-- Don't change this value (name), it's used as jar value and also used in implementation -->
+    <!-- Don't change this value (name), it's used as jar name and also used in implementation -->
     <!--Name should be the same with Github repo name as long as this artifact is served via Jitpack-->
     <name>better-error-pages-spring-boot-starter</name>
 
@@ -22,6 +22,8 @@
 
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+
+        <org-powermock.version>2.0.0-beta.5</org-powermock.version>
     </properties>
 
     <dependencies>
@@ -54,6 +56,20 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-module-junit4</artifactId>
+            <version>${org-powermock.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-api-mockito2</artifactId>
+            <version>${org-powermock.version}</version>
             <scope>test</scope>
         </dependency>
 

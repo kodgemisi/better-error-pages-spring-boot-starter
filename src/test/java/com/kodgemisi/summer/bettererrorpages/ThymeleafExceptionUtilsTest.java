@@ -95,7 +95,7 @@ public class ThymeleafExceptionUtilsTest {
 
 		Constructor<ThymeleafExceptionUtils.ErrorContext> constructor = ThymeleafExceptionUtils.ErrorContext.class.getDeclaredConstructor(String.class, String.class, String.class, String.class, String.class);
 		constructor.setAccessible(true);
-		ThymeleafExceptionUtils.ErrorContext errorContext = constructor.newInstance("com.kodgemisi.summer.bettererrorpages.ThymeleafExceptionUtils", "com.kodgemisi.summer.bettererrorpages", "ThymeleafExceptionUtils", "ThymeleafExceptionUtils.java", "52");
+		ThymeleafExceptionUtils.ErrorContext errorContext = constructor.newInstance("doesn't matter for this test case", "doesn't matter for this test case", "doesn't matter for this test case", "doesn't matter for this test case", "52");
 
 		PowerMockito.mockStatic(Files.class);
 		PowerMockito.when(Files.readAllLines(Mockito.isA(Path.class))).thenReturn(Arrays.asList(SAMPLE_SOURCE.split("\n")));
@@ -104,8 +104,8 @@ public class ThymeleafExceptionUtilsTest {
 		PowerMockito.when(mock, "getErrorContexts", SAMPLE_TRACE).thenReturn(Arrays.asList(errorContext));
 		PowerMockito.when(mock.getListOfErrorContext(ArgumentMatchers.any())).thenCallRealMethod();
 
-		Whitebox.setInternalState(mock, "projectPathForJavaFiles", projectPath + "src/main/java/");
-		Whitebox.setInternalState(mock, "projectPathForTemplateFiles", projectPath + "src/main/resources/");
+		Whitebox.setInternalState(mock, "projectPathForJavaFiles", "doesn't matter for this test case");
+		Whitebox.setInternalState(mock, "projectPathForTemplateFiles", "doesn't matter for this test case");
 
 		List<ThymeleafExceptionUtils.ErrorContext> errorContexts = mock.getListOfErrorContext(SAMPLE_TRACE);
 

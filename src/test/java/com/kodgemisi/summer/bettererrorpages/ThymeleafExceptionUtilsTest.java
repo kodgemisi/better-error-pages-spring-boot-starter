@@ -91,7 +91,7 @@ public class ThymeleafExceptionUtilsTest {
 	}
 
 	@Test
-	public void prependSpaceCharToSourceWhenFirstVisibleLineIsEmpty() throws Exception {
+	public void prependSpaceCharToSourceWhenFirstLineInEditorIsEmpty() throws Exception {
 
 		Constructor<ThymeleafExceptionUtils.ErrorContext> constructor = ThymeleafExceptionUtils.ErrorContext.class.getDeclaredConstructor(String.class, String.class, String.class, String.class, String.class);
 		constructor.setAccessible(true);

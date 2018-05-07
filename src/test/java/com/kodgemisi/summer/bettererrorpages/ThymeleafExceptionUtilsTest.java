@@ -13,23 +13,35 @@
 package com.kodgemisi.summer.bettererrorpages;
 
 import org.apache.commons.io.IOUtils;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.BlockJUnit4ClassRunner;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.reflect.Whitebox;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
-@RunWith(BlockJUnit4ClassRunner.class)
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ThymeleafExceptionUtils.class, ThymeleafExceptionUtilsTest.class})
 public class ThymeleafExceptionUtilsTest {
 
 	private static final String PROJECT_PATH = "";
@@ -38,10 +50,18 @@ public class ThymeleafExceptionUtilsTest {
 
 	private static final String SAMPLE_TRACE;
 
+	private static final String SAMPLE_SOURCE;
+
+	private static final String projectPath = "/home/destan/development/workspaces/bettererrorpages/";//FIXME
+
+	public static final String SPACE_CHARACTER = " ";
+
 	static {
-		final Resource resource = new ClassPathResource("sampleTrace.txt");
+		final Resource sampleTraceResource = new ClassPathResource("sampleTrace.txt");
+		final Resource sampleSourceResource = new ClassPathResource("sampleSource.txt");
 		try {
-			SAMPLE_TRACE = IOUtils.toString(resource.getInputStream(), StandardCharsets.UTF_8.name());
+			SAMPLE_TRACE = IOUtils.toString(sampleTraceResource.getInputStream(), StandardCharsets.UTF_8.name());
+			SAMPLE_SOURCE = IOUtils.toString(sampleSourceResource.getInputStream(), StandardCharsets.UTF_8.name());
 		}
 		catch (IOException e) {
 			throw new RuntimeException(e);
@@ -68,6 +88,35 @@ public class ThymeleafExceptionUtilsTest {
 		List<ThymeleafExceptionUtils.ErrorContext> errorContexts = (List<ThymeleafExceptionUtils.ErrorContext>) method.invoke(thymeleafExceptionUtils, SAMPLE_TRACE);
 
 		assertEquals(errorContexts.size(), 4);
+	}
+
+	@Test
+	public void prependSpaceCharToSourceWhenFirstLineInEditorIsEmpty() throws Exception {
+
+		Constructor<ThymeleafExceptionUtils.ErrorContext> constructor = ThymeleafExceptionUtils.ErrorContext.class.getDeclaredConstructor(String.class, String.class, String.class, String.class, String.class);
+		constructor.setAccessible(true);
+		ThymeleafExceptionUtils.ErrorContext errorContext = constructor.newInstance("doesn't matter for this test case", "doesn't matter for this test case", "doesn't matter for this test case", "doesn't matter for this test case", "52");
+
+		PowerMockito.mockStatic(Files.class);
+		PowerMockito.when(Files.readAllLines(Mockito.isA(Path.class))).thenReturn(Arrays.asList(SAMPLE_SOURCE.split("\n")));
+
+		ThymeleafExceptionUtils mock = PowerMockito.mock(ThymeleafExceptionUtils.class);
+		PowerMockito.when(mock, "getErrorContexts", SAMPLE_TRACE).thenReturn(Arrays.asList(errorContext));
+		PowerMockito.when(mock.getListOfErrorContext(ArgumentMatchers.any())).thenCallRealMethod();
+
+		Whitebox.setInternalState(mock, "projectPathForJavaFiles", "doesn't matter for this test case");
+		Whitebox.setInternalState(mock, "projectPathForTemplateFiles", "doesn't matter for this test case");
+
+		List<ThymeleafExceptionUtils.ErrorContext> errorContexts = mock.getListOfErrorContext(SAMPLE_TRACE);
+
+
+		assertThat(errorContexts.size(), is(1));
+		assertThat(errorContexts.iterator().next(), is(errorContext));
+
+		// -1 is due to lines starts with 1, arrays starts with 0
+		// Empty lines doesn't have \n as the string is already split by \n so we expect an empty line to be empty string
+		Assert.assertTrue("Original source code should have an empty line in 'firstLineNumber'th line", SAMPLE_SOURCE.split("\n")[errorContext.getFirstLineNumber()-1].isEmpty());
+		Assert.assertTrue("Source should start with a space character", errorContext.getSourceCode().startsWith(SPACE_CHARACTER));
 	}
 
 }

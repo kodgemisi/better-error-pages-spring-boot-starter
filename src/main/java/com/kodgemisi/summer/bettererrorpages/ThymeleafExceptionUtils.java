@@ -72,8 +72,6 @@ public class ThymeleafExceptionUtils {
 	 */
 	private final Pattern templateNameRegexPattern = Pattern.compile("\\(template: \"(.+)\" - line (\\d+), col .+\\)");
 
-	//Maybe for future use, Last Caused by regex: `"Caused by:(?:.(?!Caused by:))+$"`
-
 	protected ThymeleafExceptionUtils(String projectPath, String packageName) {
 		this.projectPathForJavaFiles = projectPath + "src/main/java/";
 		this.projectPathForTemplateFiles = projectPath + "src/main/resources/";
@@ -239,7 +237,6 @@ public class ThymeleafExceptionUtils {
 			this.errorLineNumber = Integer.parseInt(errorLineNumber);
 			fileType = FileType.JAVA;
 		}
-
 
 		/**
 		 * <pre>

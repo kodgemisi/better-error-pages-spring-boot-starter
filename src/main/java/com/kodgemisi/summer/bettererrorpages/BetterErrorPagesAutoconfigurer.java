@@ -52,7 +52,6 @@ import java.util.Set;
 @ConditionalOnActiveProfiles
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @ConditionalOnClass({ Servlet.class, DispatcherServlet.class, SpringTemplateEngine.class })
-//@ConditionalOnMissingBean(value = ErrorController.class, search = SearchStrategy.CURRENT)
 @AutoConfigureBefore({ ErrorMvcAutoConfiguration.class, WebMvcAutoConfiguration.class })
 @AllArgsConstructor
 @Slf4j
@@ -169,7 +168,7 @@ class BetterErrorPagesAutoconfigurer {
 			aProjectFilePath = propertiesFile.getPath();
 		}
 
-		// When host project runs as jar it reports resource path with file: prefix
+		// When host project runs as jar it reports resource path with "file:" prefix
 		// like file:/home/johndoe/development/workspaces/hostprojectname/target/hostprojectname-1.0.0.jar!/BOOT-INF/classes!/application.yml
 		if (aProjectFilePath.startsWith("file:")) {
 			return aProjectFilePath.substring(5).split("target")[0];

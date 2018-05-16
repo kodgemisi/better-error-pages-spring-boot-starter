@@ -6,7 +6,7 @@
 
     <groupId>com.kodgemisi.summer</groupId>
     <artifactId>better-error-pages-spring-boot-starter</artifactId>
-    <version>0.3.4</version>
+    <version>0.4.0</version>
     <packaging>jar</packaging>
 
     <!-- Don't change this value (name), it's used as jar name and also used in implementation -->
@@ -22,6 +22,9 @@
 
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+
+        <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
+        <maven-jar-plugin.version>3.1.0</maven-jar-plugin.version>
 
         <org-powermock.version>2.0.0-beta.5</org-powermock.version>
     </properties>
@@ -99,6 +102,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
+                <version>${maven-source-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -112,6 +116,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
+                <version>${maven-jar-plugin.version}</version>
                 <configuration>
                     <archive>
                         <manifest>

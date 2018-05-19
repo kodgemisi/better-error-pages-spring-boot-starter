@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -42,10 +43,6 @@ public class ThymeleafExceptionUtils {
 
 	private static final String SPAN_END = "</span>";
 
-	private final String projectPathForJavaFiles;
-
-	private final String projectPathForTemplateFiles;
-
 	private final String packageName;
 
 	/**
@@ -65,9 +62,7 @@ public class ThymeleafExceptionUtils {
 	 */
 	private final Pattern templateNameRegexPattern = Pattern.compile("\\(template: \"(.+)\" - line (\\d+), col .+\\)");
 
-	protected ThymeleafExceptionUtils(String projectPath, String packageName) {
-		this.projectPathForJavaFiles = projectPath + "src/main/java/";
-		this.projectPathForTemplateFiles = projectPath + "src/main/resources/";
+	protected ThymeleafExceptionUtils(String packageName) {
 		this.packageName = packageName;
 		classNameRegexPattern = Pattern.compile("at ((" + this.packageName + "[a-z0-9\\.]*)\\.([A-Z]\\w*)).*\\((.+):(\\d+)\\)");
 	}
@@ -111,7 +106,7 @@ public class ThymeleafExceptionUtils {
 						})
 						.toArray(String[]::new));
 
-				// When the first line is a blank line than ACE editor ignores it, this is a fix for this behavior.
+				// When the first line is a blank line the ACE editor ignores it, this is a fix for that behavior.
 				if(sourceCode.startsWith("\n")) {
 					sourceCode = " " + sourceCode;
 				}
@@ -176,16 +171,48 @@ public class ThymeleafExceptionUtils {
 
 	private Path getSourceFilePath(ErrorContext errorContext) throws IOException {
 		try {
-			//@formatter:off
-			final String classFullPath = Class.forName(errorContext.getFullyQualifiedClassName())
-												.getResource(errorContext.getClassName() + ".class").getPath()
-												.replace("/target/classes", "/src/main/java")
-												.replace(".class", ".java");
-			//@formatter:on
+			final String classFullPath;
+			if(errorContext.getFileType() == ErrorContext.FileType.JAVA) {
 
-			if(!classFullPath.endsWith(errorContext.getFileName())) {
-				//that means this is an inner class so we need to replace the file name
-				return Paths.get(classFullPath.replace(errorContext.getClassName() + ".java", errorContext.getFileName()));
+				final URL classUrl =  Class.forName(errorContext.getFullyQualifiedClassName()).getResource(errorContext.getClassName() + ".class");
+
+				if(classUrl.getProtocol().equals("jar")) {
+					//@formatter:off
+					classFullPath = classUrl.getPath()
+							.replaceFirst("\\/target.*classes\\!", "/src/main/java")
+							.replace(".class", ".java")
+							.substring(5);// paths of files inside jars are reported with "file:" prefix.
+					//@formatter:on
+				}
+				else {
+					//@formatter:off
+					classFullPath = classUrl.getPath()
+											.replace("/target/classes", "/src/main/java")
+											.replace(".class", ".java");
+					//@formatter:on
+				}
+
+				if(!classFullPath.endsWith(errorContext.getFileName())) {
+					//that means this is an inner class so we need to replace the file name
+					return Paths.get(classFullPath.replace(errorContext.getClassName() + ".java", errorContext.getFileName()));
+				}
+			}
+			else {
+
+				// Using classloader to load resource because it searches from the root of classpath even if the class is in some folder
+				final URL templateUrl = ThymeleafExceptionUtils.class.getClassLoader().getResource(errorContext.getFileName());
+
+				if(templateUrl == null) {
+					classFullPath = "";
+				}
+				else {
+					if(templateUrl.getProtocol().equals("jar")) {
+						classFullPath = templateUrl.getPath().replaceFirst("\\/target.*classes\\!", "/src/main/resources").substring(5);
+					}
+					else {
+						classFullPath = templateUrl.getPath();
+					}
+				}
 			}
 
 			return Paths.get(classFullPath);
@@ -193,25 +220,6 @@ public class ThymeleafExceptionUtils {
 		catch (ClassNotFoundException e) {
 			throw new IOException(e);
 		}
-		//		return errorContext.getFileType() == ErrorContext.FileType.HTML ? getSourceFilePathForTemplateFiles(errorContext) : getSourceFilePathForJavaFiles(errorContext);
-	}
-
-	private Path getSourceFilePathForJavaFiles(ErrorContext errorContext) {
-		final String classFileRelativePath = errorContext.getRelativePathOfClass();
-		if(log.isTraceEnabled()) {
-			log.trace("classFileRelativePath is {}", classFileRelativePath);
-		}
-
-		return Paths.get(projectPathForJavaFiles, classFileRelativePath);
-	}
-
-	private Path getSourceFilePathForTemplateFiles(ErrorContext errorContext) {
-		final String classFileRelativePath = errorContext.getRelativePathOfClass();
-		if(log.isTraceEnabled()) {
-			log.trace("classFileRelativePath is {}", classFileRelativePath);
-		}
-
-		return Paths.get(projectPathForTemplateFiles, classFileRelativePath);
 	}
 
 }

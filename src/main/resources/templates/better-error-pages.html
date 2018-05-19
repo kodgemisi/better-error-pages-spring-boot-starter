@@ -30,7 +30,7 @@ the Mozilla Public License, v. 2.0.
 
         header {
             color: #F0F0F0;
-            background: #C52F24;
+            background-color: #C52F24;
             padding: 0.5em 1.5em;
         }
 
@@ -147,6 +147,12 @@ the Mozilla Public License, v. 2.0.
             display: block;
         }
 
+        #archivedRibbon {
+            background: #1976d2;
+            color: #F0F0F0;
+            padding: 0.5em 1.5em;
+        }
+
         #cause {
             background-color: #FFCCCC;
         }
@@ -226,6 +232,10 @@ the Mozilla Public License, v. 2.0.
 <header>
     <h1 th:text="${status + ' - ' + error}">Error Title</h1>
 </header>
+
+<div id="archivedRibbon" th:if="${archived}">
+    This error is archived on <th:block th:text="${timestamp}" />
+</div>
 
 <main>
     <h2 th:text="${message}">Error message</h2>

@@ -31,6 +31,9 @@ class ErrorContext {
 
 	private String packageName;
 
+	/**
+	 * Class name or template name in the form of "templates/acme/index.html"
+	 */
 	private String className;
 
 	/**

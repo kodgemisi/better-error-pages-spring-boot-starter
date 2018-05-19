@@ -1,0 +1,75 @@
+<!--
+  ~  Copyright © 2018 Kod Gemisi Ltd.
+  ~
+  ~ This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+  ~ If a copy of the MPL was not distributed with this file,
+  ~ You can obtain one at https://mozilla.org/MPL/2.0/.
+  ~
+  ~ This Source Code Form is “Incompatible With Secondary Licenses”, as defined by
+  ~ the Mozilla Public License, v. 2.0.
+  ~
+  -->
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymleaf.org">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Error archive not available</title>
+    <style>
+        body {
+            background-color: #FAFAFA;
+            color: #333;
+            margin: 0px;
+        }
+
+        body, p, ol, ul, td {
+            font-family: helvetica, verdana, arial, sans-serif;
+            font-size:   12pt;
+            line-height: 18px;
+        }
+
+        header {
+            color: #F0F0F0;
+            background-color: #1976d2;
+            padding: 0.5em 1.5em;
+        }
+
+        main {
+            padding: 0 1.5em;
+        }
+
+        h1 {
+            margin: 0.2em 0;
+            line-height: 1.1em;
+            font-size: 2em;
+        }
+
+        h2 {
+            color: #C52F24;
+            line-height: 25px;
+        }
+
+        a, a:visited {
+            color: #980905;
+        }
+        a:hover {
+            color: #C52F24;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Error archive not available</h1>
+</header>
+
+<main>
+    <h2>Archived error pages are cleared after <th:block th:text="${timeout/1000}">10</th:block>s if never accessed before.</h2>
+
+    <p>See <a href="#">documentation</a> for details.</p>
+
+</main>
+
+</body>
+</html>

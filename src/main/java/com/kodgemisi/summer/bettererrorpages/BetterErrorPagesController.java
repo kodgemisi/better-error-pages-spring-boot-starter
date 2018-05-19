@@ -18,15 +18,15 @@ import org.springframework.boot.autoconfigure.web.servlet.error.ErrorViewResolve
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created on April, 2018
@@ -39,10 +39,16 @@ public class BetterErrorPagesController extends BasicErrorController {
 
 	private final ThymeleafExceptionUtils thymeleafExceptionUtils;
 
+	private final BetterErrorPagesService betterErrorPagesService;
+
+	private final String errorPath;
+
 	protected BetterErrorPagesController(ErrorAttributes errorAttributes, ErrorProperties errorProperties, List<ErrorViewResolver> errorViewResolvers,
-			ThymeleafExceptionUtils thymeleafExceptionUtils) {
+			ThymeleafExceptionUtils thymeleafExceptionUtils, BetterErrorPagesService betterErrorPagesService, String errorPath) {
 		super(errorAttributes, errorProperties, errorViewResolvers);
 		this.thymeleafExceptionUtils = thymeleafExceptionUtils;
+		this.betterErrorPagesService = betterErrorPagesService;
+		this.errorPath = errorPath;
 	}
 
 	@Override
@@ -58,6 +64,27 @@ public class BetterErrorPagesController extends BasicErrorController {
 	}
 
 	@Override
+	@RequestMapping
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> error(HttpServletRequest request) {
+		final ResponseEntity<Map<String, Object>> responseEntity = super.error(request);
+
+		if(responseEntity.getBody().containsKey("trace")) {
+			final String errorId = UUID.randomUUID().toString();
+			betterErrorPagesService.putErrorTrace(errorId, responseEntity.getBody());
+//			responseEntity.getHeaders().add("better-error-pages", request.getRequestURL().toString().replace(request.getRequestURI(), "/error-archive/" + errorId));
+
+			return ResponseEntity
+					.status(responseEntity.getStatusCode())
+					.headers(responseEntity.getHeaders())
+					.header("better-error-pages", getErrorPath(request, errorId))
+					.body(responseEntity.getBody());
+		}
+
+		return responseEntity;
+	}
+
+	@Override
 	protected ModelAndView resolveErrorView(HttpServletRequest request, HttpServletResponse response, HttpStatus status, Map<String, Object> model) {
 		return new ModelAndView("better-error-pages", model);
 	}
@@ -65,6 +92,10 @@ public class BetterErrorPagesController extends BasicErrorController {
 	@Override
 	public String getErrorPath() {
 		return "/error";
+	}
+
+	private String getErrorPath(HttpServletRequest request, String errorId) {
+		return request.getRequestURL().toString().replace(request.getRequestURI(), this.errorPath) + "/" + errorId;
 	}
 
 }

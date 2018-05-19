@@ -20,7 +20,7 @@ import java.lang.annotation.Target;
 import static java.lang.annotation.ElementType.*;
 
 /**
- * Indicates that annotated method is called from a view template like Thymeleaf so the developer should not be tricked by IDEs' unused warnings or
+ * Indicates that annotated method or field is called from a view template like Thymeleaf so the developer should not be tricked by IDEs' unused warnings or
  * "could be private" suggestions.
  *
  * Created on May, 2018
@@ -29,7 +29,7 @@ import static java.lang.annotation.ElementType.*;
  */
 @Documented
 @Retention(RetentionPolicy.SOURCE)
-@Target(METHOD)
+@Target({METHOD, FIELD})
 public @interface ViewTemplateApi {
 
 }

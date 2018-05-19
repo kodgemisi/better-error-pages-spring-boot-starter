@@ -36,4 +36,9 @@ class BetterErrorPagesConfigurationProperties {
 	 * Override default profiles to enable Better Error Pages.
 	 */
 	private String[] profiles = {"dev", "development"};
+
+	/**
+	 * Timeout for archived rest endpoint errors to be cleared if never accessed.
+	 */
+	private long archiveTimeout = 900000;
 }

@@ -21,7 +21,6 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.reflect.Whitebox;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
@@ -45,15 +44,11 @@ import static org.junit.Assert.assertThat;
 @PrepareForTest({ThymeleafExceptionUtils.class, ThymeleafExceptionUtilsTest.class})
 public class ThymeleafExceptionUtilsTest {
 
-	private static final String PROJECT_PATH = "";
-
 	private static final String PACKAGE_NAME = "com.kodgemisi";
 
 	private static final String SAMPLE_TRACE;
 
 	private static final String SAMPLE_SOURCE;
-
-	private static final String projectPath = "/home/destan/development/workspaces/bettererrorpages/";//FIXME
 
 	private static final String SPACE_CHARACTER = " ";
 
@@ -69,7 +64,7 @@ public class ThymeleafExceptionUtilsTest {
 		}
 	}
 
-	private ThymeleafExceptionUtils thymeleafExceptionUtils = new ThymeleafExceptionUtils(PROJECT_PATH, PACKAGE_NAME);
+	private ThymeleafExceptionUtils thymeleafExceptionUtils = new ThymeleafExceptionUtils(PACKAGE_NAME);
 
 	@Test
 	public void styledTraceTest() {
@@ -106,12 +101,7 @@ public class ThymeleafExceptionUtilsTest {
 		ThymeleafExceptionUtils mock = PowerMockito.mock(ThymeleafExceptionUtils.class);
 		PowerMockito.when(mock, "getErrorContexts", SAMPLE_TRACE).thenReturn(Arrays.asList(errorContext));
 		PowerMockito.when(mock, "getSourceFilePath", ArgumentMatchers.any()).thenReturn(Paths.get("/"));
-		PowerMockito.when(mock, "getSourceFilePathForJavaFiles", ArgumentMatchers.any()).thenCallRealMethod();
-		PowerMockito.when(mock, "getSourceFilePathForTemplateFiles", ArgumentMatchers.any()).thenCallRealMethod();
 		PowerMockito.when(mock.getListOfErrorContext(ArgumentMatchers.any())).thenCallRealMethod();
-
-		Whitebox.setInternalState(mock, "projectPathForJavaFiles", "doesn't matter for this test case");
-		Whitebox.setInternalState(mock, "projectPathForTemplateFiles", "doesn't matter for this test case");
 
 		List<ErrorContext> errorContexts = mock.getListOfErrorContext(SAMPLE_TRACE);
 

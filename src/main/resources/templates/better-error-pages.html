@@ -70,6 +70,12 @@ the Mozilla Public License, v. 2.0.
             background-color: #eee;
         }
 
+        thead tr,
+        thead tr:nth-child(odd) {
+            background-color: transparent;
+            font-weight: bold;
+        }
+
         a, a:visited {
             color: #980905;
         }
@@ -314,6 +320,32 @@ the Mozilla Public License, v. 2.0.
         </script>
     </th:block>
     <p th:if="${trace == null || trace.isEmpty()}">No stacktrace available.</p>
+
+    <th:block th:if="${status == 404}">
+
+        <h2 style="margin-top: 30px">URL Mappings</h2>
+
+        <p><strong th:text="${#request.getAttribute('path')}">/somePath</strong> is not found.</p>
+
+        <div class="details">
+            <table>
+                <thead>
+                    <tr>
+                        <td>HTTP Verb</td>
+                        <td>Path</td>
+                        <td>Controller#method</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="mapping : ${mappings}" th:object="${mapping}">
+                        <td th:text="*{httpVerb}"></td>
+                        <td th:text="*{pattern}" th:pattern="*{pattern}"></td>
+                        <td th:text="*{combinedMethodName}"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </th:block>
 
     <h2 style="margin-top: 30px">Request</h2>
 

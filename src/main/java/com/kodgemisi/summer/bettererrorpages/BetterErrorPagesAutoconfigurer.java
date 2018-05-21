@@ -33,16 +33,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.DispatcherServlet;
-import org.thymeleaf.IEngineConfiguration;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.thymeleaf.spring5.SpringTemplateEngine;
-import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
-import org.thymeleaf.templateresource.ClassLoaderTemplateResource;
-import org.thymeleaf.templateresource.ITemplateResource;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.Servlet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -64,8 +59,6 @@ class BetterErrorPagesAutoconfigurer {
 
 	private final List<ErrorViewResolver> errorViewResolvers;
 
-	private final SpringTemplateEngine templateEngine;
-
 	private final BetterErrorPagesConfigurationProperties betterErrorPagesConfigurationProperties;
 
 	/**
@@ -76,25 +69,34 @@ class BetterErrorPagesAutoconfigurer {
 	 * resolves beanType as ErrorController which eventually results in not evaluating/assuming our class as a controller and not registering {@code /error} mapping.
 	 * </p>
 	 *
+	 * @param requestMappingHandlerMapping
 	 * @param errorAttributes autowired
 	 * @param betterErrorPagesService
 	 * @param errorPath
+	 * @param requestMappingsHolder
 	 * @return a configured instance of BetterErrorPagesController
 	 */
 	@Bean
 	BetterErrorPagesController betterErrorPagesController(ErrorAttributes errorAttributes, ThymeleafExceptionUtils thymeleafExceptionUtils,
-			BetterErrorPagesService betterErrorPagesService, @Value("${server.error.path:${error.path:/error}}") String errorPath) {
+			BetterErrorPagesService betterErrorPagesService, @Value("${server.error.path:${error.path:/error}}") String errorPath,
+			RequestMappingsHolder requestMappingsHolder) {
 
 		final ErrorProperties errorProperties = this.serverProperties.getError();
 		errorProperties.setIncludeStacktrace(ErrorProperties.IncludeStacktrace.ALWAYS);
 		errorProperties.setIncludeException(true);
 
-		return new BetterErrorPagesController(errorAttributes, errorProperties, errorViewResolvers, thymeleafExceptionUtils, betterErrorPagesService, errorPath);
+		return new BetterErrorPagesController(errorAttributes, errorProperties, errorViewResolvers, thymeleafExceptionUtils, betterErrorPagesService,
+											  requestMappingsHolder, errorPath);
 	}
 
 	@Bean
 	BetterErrorPagesService betterErrorPagesService() {
 		return new BetterErrorPagesService(betterErrorPagesConfigurationProperties.getArchiveTimeout());
+	}
+
+	@Bean
+	RequestMappingsHolder requestMappingsHolder(RequestMappingHandlerMapping requestMappingHandlerMapping) {
+		return new RequestMappingsHolder(requestMappingHandlerMapping);
 	}
 
 	@Bean

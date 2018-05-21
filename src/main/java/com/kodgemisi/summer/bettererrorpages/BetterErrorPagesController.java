@@ -23,6 +23,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -41,25 +42,36 @@ public class BetterErrorPagesController extends BasicErrorController {
 
 	private final BetterErrorPagesService betterErrorPagesService;
 
+	private final RequestMappingsHolder requestMappingsHolder;
+
 	private final String errorPath;
 
 	protected BetterErrorPagesController(ErrorAttributes errorAttributes, ErrorProperties errorProperties, List<ErrorViewResolver> errorViewResolvers,
-			ThymeleafExceptionUtils thymeleafExceptionUtils, BetterErrorPagesService betterErrorPagesService, String errorPath) {
+			ThymeleafExceptionUtils thymeleafExceptionUtils, BetterErrorPagesService betterErrorPagesService,
+			RequestMappingsHolder requestMappingsHolder, String errorPath) {
 		super(errorAttributes, errorProperties, errorViewResolvers);
 		this.thymeleafExceptionUtils = thymeleafExceptionUtils;
 		this.betterErrorPagesService = betterErrorPagesService;
+		this.requestMappingsHolder = requestMappingsHolder;
 		this.errorPath = errorPath;
 	}
 
 	@Override
 	@RequestMapping(produces = "text/html")
 	public ModelAndView errorHtml(HttpServletRequest request, HttpServletResponse response) {
-		HttpStatus status = getStatus(request);
+		final HttpStatus status = getStatus(request);
 		final Map<String, Object> errorAttributes = getErrorAttributes(request, isIncludeStackTrace(request, MediaType.TEXT_HTML));
-		errorAttributes.put("thymeleafExceptionUtils", thymeleafExceptionUtils);
-		final Map<String, Object> model = Collections.unmodifiableMap(errorAttributes);
+
+		final Map<String, Object> model = new HashMap<>();
+		model.putAll(errorAttributes);
+		model.put("thymeleafExceptionUtils", thymeleafExceptionUtils);
+
+		if(status.equals(HttpStatus.NOT_FOUND)) {
+			model.put("mappings", requestMappingsHolder.getMappings());
+		}
+
 		response.setStatus(status.value());
-		ModelAndView modelAndView = resolveErrorView(request, response, status, model);
+		final ModelAndView modelAndView = resolveErrorView(request, response, status, model);
 		return (modelAndView == null ? new ModelAndView("error", model) : modelAndView);
 	}
 
@@ -72,7 +84,6 @@ public class BetterErrorPagesController extends BasicErrorController {
 		if(responseEntity.getBody().containsKey("trace")) {
 			final String errorId = UUID.randomUUID().toString();
 			betterErrorPagesService.putErrorTrace(errorId, responseEntity.getBody());
-//			responseEntity.getHeaders().add("better-error-pages", request.getRequestURL().toString().replace(request.getRequestURI(), "/error-archive/" + errorId));
 
 			return ResponseEntity
 					.status(responseEntity.getStatusCode())

@@ -21,7 +21,6 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.reflect.Whitebox;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
@@ -32,6 +31,7 @@ import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
@@ -44,17 +44,13 @@ import static org.junit.Assert.assertThat;
 @PrepareForTest({ThymeleafExceptionUtils.class, ThymeleafExceptionUtilsTest.class})
 public class ThymeleafExceptionUtilsTest {
 
-	private static final String PROJECT_PATH = "";
-
 	private static final String PACKAGE_NAME = "com.kodgemisi";
 
 	private static final String SAMPLE_TRACE;
 
 	private static final String SAMPLE_SOURCE;
 
-	private static final String projectPath = "/home/destan/development/workspaces/bettererrorpages/";//FIXME
-
-	public static final String SPACE_CHARACTER = " ";
+	private static final String SPACE_CHARACTER = " ";
 
 	static {
 		final Resource sampleTraceResource = new ClassPathResource("sampleTrace.txt");
@@ -68,7 +64,7 @@ public class ThymeleafExceptionUtilsTest {
 		}
 	}
 
-	private ThymeleafExceptionUtils thymeleafExceptionUtils = new ThymeleafExceptionUtils(PROJECT_PATH, PACKAGE_NAME);
+	private ThymeleafExceptionUtils thymeleafExceptionUtils = new ThymeleafExceptionUtils(PACKAGE_NAME);
 
 	@Test
 	public void styledTraceTest() {
@@ -85,7 +81,9 @@ public class ThymeleafExceptionUtilsTest {
 
 		Method method = ThymeleafExceptionUtils.class.getDeclaredMethod("getErrorContexts", String.class);
 		method.setAccessible(true);
-		List<ThymeleafExceptionUtils.ErrorContext> errorContexts = (List<ThymeleafExceptionUtils.ErrorContext>) method.invoke(thymeleafExceptionUtils, SAMPLE_TRACE);
+
+		@SuppressWarnings("unchecked")
+		List<ErrorContext> errorContexts = (List<ErrorContext>) method.invoke(thymeleafExceptionUtils, SAMPLE_TRACE);
 
 		assertEquals(errorContexts.size(), 4);
 	}
@@ -93,21 +91,19 @@ public class ThymeleafExceptionUtilsTest {
 	@Test
 	public void prependSpaceCharToSourceWhenFirstLineInEditorIsEmpty() throws Exception {
 
-		Constructor<ThymeleafExceptionUtils.ErrorContext> constructor = ThymeleafExceptionUtils.ErrorContext.class.getDeclaredConstructor(String.class, String.class, String.class, String.class, String.class);
+		Constructor<ErrorContext> constructor = ErrorContext.class.getDeclaredConstructor(String.class, String.class, String.class, String.class, String.class);
 		constructor.setAccessible(true);
-		ThymeleafExceptionUtils.ErrorContext errorContext = constructor.newInstance("doesn't matter for this test case", "doesn't matter for this test case", "doesn't matter for this test case", "doesn't matter for this test case", "52");
+		ErrorContext errorContext = constructor.newInstance("doesn't matter for this test case", "doesn't matter for this test case", "doesn't matter for this test case", "doesn't matter for this test case", "52");
 
 		PowerMockito.mockStatic(Files.class);
 		PowerMockito.when(Files.readAllLines(Mockito.isA(Path.class))).thenReturn(Arrays.asList(SAMPLE_SOURCE.split("\n")));
 
 		ThymeleafExceptionUtils mock = PowerMockito.mock(ThymeleafExceptionUtils.class);
 		PowerMockito.when(mock, "getErrorContexts", SAMPLE_TRACE).thenReturn(Arrays.asList(errorContext));
+		PowerMockito.when(mock, "getSourceFilePath", ArgumentMatchers.any()).thenReturn(Paths.get("/"));
 		PowerMockito.when(mock.getListOfErrorContext(ArgumentMatchers.any())).thenCallRealMethod();
 
-		Whitebox.setInternalState(mock, "projectPathForJavaFiles", "doesn't matter for this test case");
-		Whitebox.setInternalState(mock, "projectPathForTemplateFiles", "doesn't matter for this test case");
-
-		List<ThymeleafExceptionUtils.ErrorContext> errorContexts = mock.getListOfErrorContext(SAMPLE_TRACE);
+		List<ErrorContext> errorContexts = mock.getListOfErrorContext(SAMPLE_TRACE);
 
 
 		assertThat(errorContexts.size(), is(1));

@@ -30,7 +30,7 @@ the Mozilla Public License, v. 2.0.
 
         header {
             color: #F0F0F0;
-            background: #C52F24;
+            background-color: #C52F24;
             padding: 0.5em 1.5em;
         }
 
@@ -68,6 +68,12 @@ the Mozilla Public License, v. 2.0.
         }
         tr:nth-child(odd) {
             background-color: #eee;
+        }
+
+        thead tr,
+        thead tr:nth-child(odd) {
+            background-color: transparent;
+            font-weight: bold;
         }
 
         a, a:visited {
@@ -145,6 +151,12 @@ the Mozilla Public License, v. 2.0.
             padding: 8px 15px;
             border-bottom: 1px solid #D0D0D0;
             display: block;
+        }
+
+        #archivedRibbon {
+            background: #1976d2;
+            color: #F0F0F0;
+            padding: 0.5em 1.5em;
         }
 
         #cause {
@@ -227,6 +239,10 @@ the Mozilla Public License, v. 2.0.
     <h1 th:text="${status + ' - ' + error}">Error Title</h1>
 </header>
 
+<div id="archivedRibbon" th:if="${archived}">
+    This error is archived on <th:block th:text="${timestamp}" />
+</div>
+
 <main>
     <h2 th:text="${message}">Error message</h2>
 
@@ -304,6 +320,32 @@ the Mozilla Public License, v. 2.0.
         </script>
     </th:block>
     <p th:if="${trace == null || trace.isEmpty()}">No stacktrace available.</p>
+
+    <th:block th:if="${status == 404}">
+
+        <h2 style="margin-top: 30px">URL Mappings</h2>
+
+        <p><strong th:text="${#request.getAttribute('path')}">/somePath</strong> is not found.</p>
+
+        <div class="details">
+            <table>
+                <thead>
+                    <tr>
+                        <td>HTTP Verb</td>
+                        <td>Path</td>
+                        <td>Controller#method</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="mapping : ${mappings}" th:object="${mapping}">
+                        <td th:text="*{httpVerb}"></td>
+                        <td th:text="*{pattern}" th:pattern="*{pattern}"></td>
+                        <td th:text="*{combinedMethodName}"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </th:block>
 
     <h2 style="margin-top: 30px">Request</h2>
 

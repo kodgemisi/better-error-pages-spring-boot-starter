@@ -12,13 +12,11 @@
 
 package com.kodgemisi.summer.bettererrorpages;
 
-import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 
-import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -41,17 +39,9 @@ import java.util.regex.Pattern;
 @Slf4j
 public class ThymeleafExceptionUtils {
 
-	private static final String TEMPLATES_PATH = "templates/";
-
-	public static final String TEMPLATES_SUFFIX = ".html";
-
 	private static final String SPAN_START = "<span class=\"own-class\">";
 
 	private static final String SPAN_END = "</span>";
-
-	private final String projectPathForJavaFiles;
-
-	private final String projectPathForTemplateFiles;
 
 	private final String packageName;
 
@@ -72,19 +62,12 @@ public class ThymeleafExceptionUtils {
 	 */
 	private final Pattern templateNameRegexPattern = Pattern.compile("\\(template: \"(.+)\" - line (\\d+), col .+\\)");
 
-	protected ThymeleafExceptionUtils(String projectPath, String packageName) {
-		this.projectPathForJavaFiles = projectPath + "src/main/java/";
-		this.projectPathForTemplateFiles = projectPath + "src/main/resources/";
+	protected ThymeleafExceptionUtils(String packageName) {
 		this.packageName = packageName;
 		classNameRegexPattern = Pattern.compile("at ((" + this.packageName + "[a-z0-9\\.]*)\\.([A-Z]\\w*)).*\\((.+):(\\d+)\\)");
 	}
 
-	private String colorizeTrace(String trace) {
-		return String.join("\n", Arrays.stream(trace.split("\n"))
-				.map(s -> s.contains(packageName) ? (SPAN_START + s + SPAN_END) : s)
-				.toArray(String[]::new));
-	}
-
+	@ViewTemplateApi
 	public String styledTrace(String trace) {
 		if(trace == null) {
 			return null;
@@ -93,6 +76,7 @@ public class ThymeleafExceptionUtils {
 	}
 
 	@NonNull
+	@ViewTemplateApi
 	public List<ErrorContext> getListOfErrorContext(String trace) {
 
 		if(trace == null) {
@@ -103,14 +87,9 @@ public class ThymeleafExceptionUtils {
 		final List<ErrorContext> errorContexts = getErrorContexts(trace);
 
 		for(ErrorContext errorContext : errorContexts) {
-			final String classFileRelativePath = errorContext.getRelativePathOfClass();
-			if(log.isTraceEnabled()) {
-				log.trace("classFileRelativePath is {}", classFileRelativePath);
-			}
 
 			try {
-				final String basePath = errorContext.getFileType() == ErrorContext.FileType.HTML ? projectPathForTemplateFiles : projectPathForJavaFiles;
-				final Path sourceFilePath = Paths.get(basePath, classFileRelativePath);
+				final Path sourceFilePath = getSourceFilePath(errorContext);
 
 				if(log.isTraceEnabled()) {
 					log.trace("sourceFilePath is {}", sourceFilePath);
@@ -127,7 +106,7 @@ public class ThymeleafExceptionUtils {
 						})
 						.toArray(String[]::new));
 
-				// When the first line is a blank line than ACE editor ignores it, this is a fix for this behavior.
+				// When the first line is a blank line the ACE editor ignores it, this is a fix for that behavior.
 				if(sourceCode.startsWith("\n")) {
 					sourceCode = " " + sourceCode;
 				}
@@ -152,6 +131,7 @@ public class ThymeleafExceptionUtils {
 	 * @param o
 	 * @return
 	 */
+	@ViewTemplateApi
 	public String toStringSafe(Object o) {
 		try {
 			return o.toString();
@@ -159,6 +139,12 @@ public class ThymeleafExceptionUtils {
 		catch (Exception e) {
 			return "Lazy initialization exception in toString(): " + e.getMessage();
 		}
+	}
+
+	private String colorizeTrace(String trace) {
+		return String.join("\n", Arrays.stream(trace.split("\n"))
+				.map(s -> s.contains(packageName) ? (SPAN_START + s + SPAN_END) : s)
+				.toArray(String[]::new));
 	}
 
 	private List<ErrorContext> getErrorContexts(String trace) {
@@ -183,81 +169,56 @@ public class ThymeleafExceptionUtils {
 		return errorContexts;
 	}
 
-	@Getter
-	protected static class ErrorContext {
+	private Path getSourceFilePath(ErrorContext errorContext) throws IOException {
+		try {
+			final String classFullPath;
+			if(errorContext.getFileType() == ErrorContext.FileType.JAVA) {
 
-		enum FileType {
-			JAVA, HTML
+				final URL classUrl =  Class.forName(errorContext.getFullyQualifiedClassName()).getResource(errorContext.getClassName() + ".class");
+
+				if(classUrl.getProtocol().equals("jar")) {
+					//@formatter:off
+					classFullPath = classUrl.getPath()
+							.replaceFirst("\\/target.*classes\\!", "/src/main/java")
+							.replace(".class", ".java")
+							.substring(5);// paths of files inside jars are reported with "file:" prefix.
+					//@formatter:on
+				}
+				else {
+					//@formatter:off
+					classFullPath = classUrl.getPath()
+											.replace("/target/classes", "/src/main/java")
+											.replace(".class", ".java");
+					//@formatter:on
+				}
+
+				if(!classFullPath.endsWith(errorContext.getFileName())) {
+					//that means this is an inner class so we need to replace the file name
+					return Paths.get(classFullPath.replace(errorContext.getClassName() + ".java", errorContext.getFileName()));
+				}
+			}
+			else {
+
+				// Using classloader to load resource because it searches from the root of classpath even if the class is in some folder
+				final URL templateUrl = ThymeleafExceptionUtils.class.getClassLoader().getResource(errorContext.getFileName());
+
+				if(templateUrl == null) {
+					classFullPath = "";
+				}
+				else {
+					if(templateUrl.getProtocol().equals("jar")) {
+						classFullPath = templateUrl.getPath().replaceFirst("\\/target.*classes\\!", "/src/main/resources").substring(5);
+					}
+					else {
+						classFullPath = templateUrl.getPath();
+					}
+				}
+			}
+
+			return Paths.get(classFullPath);
 		}
-
-		private String fullyQualifiedClassName;
-
-		private String packageName;
-
-		private String className;
-
-		/**
-		 * For inner classes and non-public classes their file name is different
-		 */
-		private String fileName;
-
-		private int errorLineNumber;
-
-		@Setter
-		private String sourceCodePath;
-
-		@Setter
-		private String sourceCode;
-
-		@Setter
-		private int firstLineNumber;
-
-		private final FileType fileType;
-
-		public String getId() {
-			return fullyQualifiedClassName + ":" + errorLineNumber;
-		}
-
-		private ErrorContext(String templateName, String errorLineNumber) {
-			this.errorLineNumber = Integer.parseInt(errorLineNumber);
-
-			// If the error is in a layout then templateName comes with .html suffix due to non-standard exception reporting of Thymeleaf
-			this.fileName = templateName.endsWith(TEMPLATES_SUFFIX) ? TEMPLATES_PATH + templateName : TEMPLATES_PATH + templateName + TEMPLATES_SUFFIX;
-			this.packageName = "";
-			this.className = fileName;
-			this.fullyQualifiedClassName = this.fileName;
-			fileType = FileType.HTML;
-		}
-
-		private ErrorContext(String fullyQualifiedClassName, String packageName, String className, String fileName, String errorLineNumber) {
-			this.fullyQualifiedClassName = fullyQualifiedClassName;
-			this.packageName = packageName;
-			this.className = className;
-			this.fileName = fileName;
-			this.errorLineNumber = Integer.parseInt(errorLineNumber);
-			fileType = FileType.JAVA;
-		}
-
-		/**
-		 * <pre>
-		 * matcher.group(0): whole line like at com.kodgemisi.demo.ExampleController.error(ExampleController.java:69)
-		 * matcher.group(1): fully qualified class name like like com.kodgemisi.demo.ExampleController
-		 * matcher.group(2): package name like com.kodgemisi.demo
-		 * matcher.group(3): class name like ExampleController
-		 * matcher.group(4): file name like ExampleController.java
-		 * matcher.group(5): line number like 69
-		 * </pre>
-		 */
-		static ErrorContext extractFromClassMatcher(Matcher matcher) {
-			return new ErrorContext(matcher.group(1), matcher.group(2), matcher.group(3), matcher.group(4), matcher.group(5));
-		}
-
-		static ErrorContext extractFromTemplateMatcher(Matcher matcher) {
-			return new ErrorContext(matcher.group(1), matcher.group(2));
-		}
-
-		String getRelativePathOfClass() {
-			return this.getPackageName().replaceAll("\\.", File.separator) + File.separator + this.getFileName();
+		catch (ClassNotFoundException e) {
+			throw new IOException(e);
 		}
 	}
 

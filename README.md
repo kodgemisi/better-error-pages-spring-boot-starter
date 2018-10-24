@@ -4,6 +4,8 @@ This is a `Spring Boot Starter` project which provides Rails like error pages fo
 
 ![Screenshot](docs/screenshot.png)
 
+For **rest requests**, any error is archived until a configurable `timeout` and the error page url is sent in rest request's response headers.
+
 ![Screenshot](docs/rest.png)
 
 ![Screenshot](docs/rest-error.png)

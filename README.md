@@ -4,6 +4,10 @@ This is a `Spring Boot Starter` project which provides Rails like error pages fo
 
 ![Screenshot](docs/screenshot.png)
 
+![Screenshot](docs/rest.png)
+
+![Screenshot](docs/rest-error.png)
+
 ## Demo
 
 https://better-error-pages-demo.herokuapp.com

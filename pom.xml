@@ -6,7 +6,7 @@
 
     <groupId>com.kodgemisi.summer</groupId>
     <artifactId>better-error-pages-spring-boot-starter</artifactId>
-    <version>0.4.0-beta</version>
+    <version>0.4.0</version>
     <packaging>jar</packaging>
 
     <name>better-error-pages-spring-boot-starter</name>

@@ -59,6 +59,10 @@ the Mozilla Public License, v. 2.0.
             word-wrap:break-word;
             vertical-align: top;
         }
+        td:nth-child(2) > div {
+            max-height: 200px;
+            overflow: hidden;
+        }
         table, tr, td {
             border: 0;
         }
@@ -130,6 +134,20 @@ the Mozilla Public License, v. 2.0.
             z-index: 2;
         }
 
+        .expandable {
+            cursor: pointer;
+            position: relative;
+        }
+        .expandable::after {
+            content: 'expandable';
+            position: absolute;
+            right: 0;
+            top: 0;
+            color: lightgray;
+            font-style: italic;
+            font-size: 0.8em;
+        }
+
         .path {
             color: gray;
             background-color: #ebebeb;
@@ -169,22 +187,26 @@ the Mozilla Public License, v. 2.0.
         }
 
         #copyMessage {
+            position: relative;
             background: rgba(0,0,0,.7);
             color: white;
             padding: 20px;
             min-width: 150px;
             text-align: center;
             border-radius: 3px;
+            left: -50%;
+        }
+        #copyMessageWrapper {
             position: fixed;
             top: 50%;
             left: 50%;
             z-index: 3;
             opacity: 0;
         }
-        #copyMessage.show {
+        #copyMessageWrapper.show {
             opacity: 1;
         }
-        #copyMessage.hide {
+        #copyMessageWrapper.hide {
             opacity: 0;
             animation: fadeInFromNone 0.5s ease-out;
         }
@@ -388,7 +410,7 @@ the Mozilla Public License, v. 2.0.
                 </tr>
                 <tr th:each="requestAttributeName : ${requestAttributeNames}">
                     <td th:text="${requestAttributeName}"></td>
-                    <td th:text="${#request.getAttribute(requestAttributeName)}"></td>
+                    <td><div th:text="${#request.getAttribute(requestAttributeName)}"></div></td>
                 </tr>
             </table>
         </div>
@@ -403,7 +425,7 @@ the Mozilla Public License, v. 2.0.
                 </tr>
                 <tr th:each="entry : ${sessionAttributes}">
                     <td th:text="${entry.key}"></td>
-                    <td th:text="${thymeleafExceptionUtils.toStringSafe(entry.value)}"></td>
+                    <td><div th:text="${thymeleafExceptionUtils.toStringSafe(entry.value)}"></div></td>
                 </tr>
             </table>
         </div>
@@ -434,14 +456,18 @@ the Mozilla Public License, v. 2.0.
             <table><!--/* Thanks: https://stackoverflow.com/a/42103790/878361 */-->
                 <tr th:each="var : ${#vars.getVariableNames()}">
                     <td th:text="${var}"></td>
-                    <td th:text="${#vars.getVariable(var)}"></td>
+                    <td><div th:text="${#vars.getVariable(var)}"></div></td>
                 </tr>
             </table>
         </div>
     </div>
 
     <div id="selectionArea" style="color: transparent;position: fixed;top:-100px;"></div>
-    <div id="copyMessage">Copied to clipboard.<br><span></span></div>
+    <div id="copyMessageWrapper">
+        <div id="copyMessage">
+            Copied to clipboard.<br><span></span>
+        </div>
+    </div>
     <div id="searchBox">
         <div>
             <svg style="width: 20px;margin:0 5px 0 5px;vertical-align: middle;" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 48 48"><defs><path id="a" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z"/></defs><clipPath id="b"><use xlink:href="#a" overflow="visible"/></clipPath><path clip-path="url(#b)" fill="#FBBC05" d="M0 37V11l17 13z"/><path clip-path="url(#b)" fill="#EA4335" d="M0 11l17 13 7-6.1L48 14V0H0z"/><path clip-path="url(#b)" fill="#34A853" d="M0 37l30-23 7.9 1L48 0v48H0z"/><path clip-path="url(#b)" fill="#4285F4" d="M48 48L17 24l-4-3 35-10z"/></svg>
@@ -513,11 +539,23 @@ the Mozilla Public License, v. 2.0.
     }, false);
 </script>
 
-<!--/* Util functions */-->
+<!--/* Other Functions */-->
 <script>
+
+    const isOverflown = function(element) {
+        return element.scrollHeight > element.clientHeight || element.scrollWidth > element.clientWidth;
+    };
+    const toggleExpandTd = function () {
+        this.style.maxHeight = this.style.maxHeight ? '' : 'fit-content';
+    };
+    const processTdsForOverflow = function () {
+        document.querySelectorAll('td:nth-child(2) > div').forEach(e => isOverflown(e) ? e.classList.add('expandable') : '');
+        document.querySelectorAll('.expandable').forEach(e => e.onclick = toggleExpandTd);
+    };
     const toggle = function(id) {
         const el = document.getElementById(id).style;
         el.display = el.display == 'none' ? 'block' : 'none';
+        processTdsForOverflow();
         return false;
     };
     const show = function(id) {
@@ -552,7 +590,7 @@ the Mozilla Public License, v. 2.0.
         window.getSelection().selectAllChildren(selectionAreaEl);
         const isCopySuccessful = document.execCommand('copy');
         if (isCopySuccessful) {
-            const copyMessageEl = document.getElementById('copyMessage');
+            const copyMessageEl = document.getElementById('copyMessageWrapper');
             copyMessageEl.querySelector('span').innerText = text;
             copyMessageEl.classList.remove('hide');
             copyMessageEl.classList.add('show');

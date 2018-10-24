@@ -73,7 +73,8 @@ better-error-pages:
 ## Limitations
 
 * Won't work for package names containing upper case characters.
-* Can't show source code in multi module projects but other features will work.
+* Can't show source code in multi module projects only if the project is run as packaged but other features will work.
+  * When running multi module projects from an IDE everything just works.
 
 ## Troubleshooting
 

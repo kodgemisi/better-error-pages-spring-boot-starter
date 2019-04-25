@@ -4,6 +4,8 @@ This is a `Spring Boot Starter` project which provides Rails like error pages fo
 
 ![Screenshot](docs/screenshot.png)
 
+For **rest requests**, any error is archived until a configurable `timeout` and the error page url is sent in rest request's response headers.
+
 ![Screenshot](docs/rest.png)
 
 ![Screenshot](docs/rest-error.png)
@@ -71,7 +73,8 @@ better-error-pages:
 ## Limitations
 
 * Won't work for package names containing upper case characters.
-* Can't show source code in multi module projects but other features will work.
+* Can't show source code in multi module projects only if the project is run as packaged but other features will work.
+  * When running multi module projects from an IDE everything just works.
 
 ## Troubleshooting
 

@@ -10,7 +10,7 @@
  *
  */
 
-package com.kodgemisi.summer.bettererrorpages;
+package io.summerframework.bettererrorpages;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;

@@ -10,11 +10,12 @@
  *
  */
 
-package com.kodgemisi.summer.bettererrorpages;
+package io.summerframework.bettererrorpages;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,18 +25,21 @@ import org.springframework.web.context.WebApplicationContext;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(properties = {"better-error-pages.package-name:com.kodgemisi", "logging.level.com.kodgemisi=trace"}, classes = UserConfiguration.class)
-@TestPropertySource(properties = {"spring.profiles.active=abc, foo", "better-error-pages.profiles=bar, foo"})
+@TestPropertySource(properties = "")
 @EnableAutoConfiguration
-public class ConfigurationTestForCustomProfileTest {
+public class ConfigurationTestForNoProfileTest {
 
 	@Autowired
 	private WebApplicationContext applicationContext;
 
-	@Test
-	public void enabledWhenNoExpilicitBetterErrorPagesProfileSet() {
+	@Test(expected = NoSuchBeanDefinitionException.class)
+	public void notEnabledWhenNoExpilicitBetterErrorPagesProfileSetCheckThymeleafExceptionUtils() {
 		ThymeleafExceptionUtils thymeleafExceptionUtils = applicationContext.getBean(ThymeleafExceptionUtils.class);
 		Assert.assertNotNull(thymeleafExceptionUtils);
+	}
 
+	@Test(expected = NoSuchBeanDefinitionException.class)
+	public void notEnabledWhenNoExpilicitBetterErrorPagesProfileSetCheckBetterErrorPagesController() {
 		BetterErrorPagesController betterErrorPagesController = applicationContext.getBean(BetterErrorPagesController.class);
 		Assert.assertNotNull(betterErrorPagesController);
 	}

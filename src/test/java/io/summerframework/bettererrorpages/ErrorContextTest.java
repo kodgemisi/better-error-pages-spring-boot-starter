@@ -1,4 +1,4 @@
-package com.kodgemisi.summer.bettererrorpages;
+package io.summerframework.bettererrorpages;
 
 import com.kodgemisi.bettererrorpagesdemo.DemoClass;
 import org.junit.jupiter.api.Test;
@@ -80,7 +80,7 @@ class ErrorContextTest {
 
 		method.invoke(errorContext);
 
-		assertTrue(errorContext.getSourceCodePath().contains("/src/main/java/com/kodgemisi/summer/bettererrorpages/BetterErrorPagesArchiveController.java"));
+		assertTrue(errorContext.getSourceCodePath().contains("/src/main/java/io/summerframework/bettererrorpages/BetterErrorPagesArchiveController.java"));
 	}
 
 	@Test

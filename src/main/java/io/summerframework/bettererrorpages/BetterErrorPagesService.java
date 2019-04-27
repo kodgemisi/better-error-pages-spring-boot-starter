@@ -10,7 +10,7 @@
  *
  */
 
-package com.kodgemisi.summer.bettererrorpages;
+package io.summerframework.bettererrorpages;
 
 import java.util.*;
 import java.util.concurrent.Executors;

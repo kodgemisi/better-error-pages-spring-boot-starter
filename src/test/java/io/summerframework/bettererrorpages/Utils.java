@@ -1,5 +1,6 @@
-package com.kodgemisi.summer.bettererrorpages;
+package io.summerframework.bettererrorpages;
 
+import io.summerframework.bettererrorpages.TraceParser;
 import org.apache.commons.io.IOUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;

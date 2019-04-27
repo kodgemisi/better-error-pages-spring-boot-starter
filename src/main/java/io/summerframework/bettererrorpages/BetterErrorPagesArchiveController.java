@@ -10,7 +10,7 @@
  *
  */
 
-package com.kodgemisi.summer.bettererrorpages;
+package io.summerframework.bettererrorpages;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;

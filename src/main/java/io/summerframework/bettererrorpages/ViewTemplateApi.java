@@ -10,7 +10,7 @@
  *
  */
 
-package com.kodgemisi.summer.bettererrorpages;
+package io.summerframework.bettererrorpages;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;

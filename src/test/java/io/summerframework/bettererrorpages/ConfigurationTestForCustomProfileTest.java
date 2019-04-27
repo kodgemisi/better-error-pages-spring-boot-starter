@@ -10,7 +10,7 @@
  *
  */
 
-package com.kodgemisi.summer.bettererrorpages;
+package io.summerframework.bettererrorpages;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -24,9 +24,9 @@ import org.springframework.web.context.WebApplicationContext;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(properties = {"better-error-pages.package-name:com.kodgemisi", "logging.level.com.kodgemisi=trace"}, classes = UserConfiguration.class)
-@TestPropertySource(properties = {"spring.profiles.active=dev"})
+@TestPropertySource(properties = {"spring.profiles.active=abc, foo", "better-error-pages.profiles=bar, foo"})
 @EnableAutoConfiguration
-public class ConfigurationTestForDevProfileTest {
+public class ConfigurationTestForCustomProfileTest {
 
 	@Autowired
 	private WebApplicationContext applicationContext;

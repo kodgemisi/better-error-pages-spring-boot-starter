@@ -10,7 +10,7 @@
  *
  */
 
-package com.kodgemisi.summer.bettererrorpages;
+package io.summerframework.bettererrorpages;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.web.ErrorProperties;

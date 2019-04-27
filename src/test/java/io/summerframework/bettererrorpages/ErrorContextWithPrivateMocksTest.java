@@ -1,5 +1,6 @@
-package com.kodgemisi.summer.bettererrorpages;
+package io.summerframework.bettererrorpages;
 
+import io.summerframework.bettererrorpages.ErrorContext;
 import org.junit.runner.RunWith;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;

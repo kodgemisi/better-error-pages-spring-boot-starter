@@ -1,0 +1,3 @@
+target package, whole line
+com.kodgemisi, "\tat org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:193)\n"
+com.kodgemisi, "\tat com.apache.kodgemisi.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:193)\n"

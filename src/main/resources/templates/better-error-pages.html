@@ -570,8 +570,14 @@ the Mozilla Public License, v. 2.0.
         return false;
     };
     const scrollToCause = function () {
+        const causeEl = document.getElementById('cause');
+
+        if (!causeEl) {
+            return false;
+        }
+
         const currentScrollY = window.scrollY;
-        document.getElementById('cause').scrollIntoView();
+        causeEl.scrollIntoView();
 
         const shouldRestorePageScroll = document.getElementById('trace').classList.contains('compact');
 
@@ -600,6 +606,8 @@ the Mozilla Public License, v. 2.0.
         }, 1200);
         }
     }
+
+    scrollToCause();
 </script>
 
 </body>

@@ -1,0 +1,3 @@
+target package, whole line, fully qualified class name, package name, class name, file name, line number
+com.kodgemisi, "\tat com.kodgemisi.bettererrorpagesdemo.DemoClass.error(NonPublicController.java:29)\n", com.kodgemisi.bettererrorpagesdemo.DemoClass, com.kodgemisi.bettererrorpagesdemo, DemoClass, NonPublicController.java, 29
+com.kodgemisi, "\tat com.kodgemisi.bettererrorpagesdemo.NonPublicController.demo(NonPublicController.java:18)\n", com.kodgemisi.bettererrorpagesdemo.NonPublicController, com.kodgemisi.bettererrorpagesdemo,NonPublicController, NonPublicController.java, 18

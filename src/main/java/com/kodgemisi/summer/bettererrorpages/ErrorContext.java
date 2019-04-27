@@ -14,16 +14,29 @@ package com.kodgemisi.summer.bettererrorpages;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
-import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 
+@Slf4j
 @Getter
 class ErrorContext {
 
+	enum FileType {
+		JAVA, HTML
+	}
+
+	private static final String TEMPLATES_SUFFIX = ".html";
+
 	private static final String TEMPLATES_PATH = "templates/";
 
-	public static final String TEMPLATES_SUFFIX = ".html";
+	private static final char SPACE_CHARACTER = ' ';
 
 	private final FileType fileType;
 
@@ -61,6 +74,8 @@ class ErrorContext {
 		this.className = fileName;
 		this.fullyQualifiedClassName = this.fileName;
 		fileType = FileType.HTML;
+
+		this.parseSourceCode();
 	}
 
 	private ErrorContext(String fullyQualifiedClassName, String packageName, String className, String fileName, String errorLineNumber) {
@@ -70,6 +85,14 @@ class ErrorContext {
 		this.fileName = fileName;
 		this.errorLineNumber = Integer.parseInt(errorLineNumber);
 		fileType = FileType.JAVA;
+
+		this.parseSourceCode();
+	}
+
+
+	@ViewTemplateApi
+	public String getId() {
+		return fullyQualifiedClassName + ":" + errorLineNumber;
 	}
 
 	/**
@@ -90,15 +113,95 @@ class ErrorContext {
 		return new ErrorContext(matcher.group(1), matcher.group(2));
 	}
 
-	public String getId() {
-		return fullyQualifiedClassName + ":" + errorLineNumber;
+	private void parseSourceCode() {
+
+		try {
+			final Path sourceFilePath = getSourceFilePath();
+
+			if (log.isTraceEnabled()) {
+				log.trace("sourceFilePath is {}", sourceFilePath);
+			}
+
+			final int firstLineNumber = Math.max(this.getErrorLineNumber() - 6, 0);
+			final int lastLineNumber = this.getErrorLineNumber() + 5;
+			final AtomicInteger index = new AtomicInteger();
+
+			String sourceCode = String.join("\n", Files.readAllLines(sourceFilePath).stream().filter(s -> {
+				final int currentLineNumber = index.getAndIncrement();
+				return currentLineNumber >= firstLineNumber && currentLineNumber < lastLineNumber;
+			}).toArray(String[]::new));
+
+			// When the first line is a new line then the ACE editor ignores it, this is a fix for that behavior.
+			if (sourceCode.startsWith("\n")) {
+				sourceCode = SPACE_CHARACTER + sourceCode;
+			}
+
+			this.setFirstLineNumber(firstLineNumber + 1);
+			this.setSourceCode(sourceCode);
+			this.setSourceCodePath(sourceFilePath.toString());
+		}
+		catch (IOException | ClassNotFoundException e) {
+			if(log.isTraceEnabled()) {
+				log.trace(e.getMessage(), e);
+			}
+			this.setSourceCode("Cannot parse source file, exception is logged.");
+			//TODO add parsing stacktrace to ErrorContext in order to make it easier to report errors via only submitting the produced HTML page.
+		}
 	}
 
-	String getRelativePathOfClass() {
-		return this.getPackageName().replaceAll("\\.", File.separator) + File.separator + this.getFileName();
+	private Path getSourceFilePath() throws ClassNotFoundException {
+
+		assert this.fileType != null && this.fullyQualifiedClassName != null && this.className != null
+				&& this.fileName != null : "ErrorContext should be fully initialized before this method is called.";
+
+		final String classFullPath;
+		if (this.getFileType() == ErrorContext.FileType.JAVA) {
+
+			final URL classUrl = Class.forName(this.getFullyQualifiedClassName()).getResource(this.getClassName() + ".class");
+
+			if (classUrl.getProtocol().equals("jar")) {
+				//@formatter:off
+				classFullPath = classUrl.getPath()
+										.replaceFirst("\\/target.*classes\\!", "/src/main/java")
+										.replace(".class", ".java")
+										.substring(5);// paths of files inside jars are reported with "file:" prefix.
+				//@formatter:on
+			}
+			else {
+				//@formatter:off
+				classFullPath = classUrl.getPath()
+										.replace("/target/classes", "/src/main/java")
+										.replace(".class", ".java")
+
+										//this addition is only necessary for non-jar executions as the tests only run in this way.
+										.replace("/target/test-classes", "/src/test/java");
+				//@formatter:on
+			}
+
+			if (!classFullPath.endsWith(this.getFileName())) {
+				//that means this is an inner class so we need to replace the file name
+				return Paths.get(classFullPath.replace(this.getClassName() + ".java", this.getFileName()));
+			}
+		}
+		else {
+
+			// Using classloader to load resource because it searches from the root of classpath even if the class is in some folder
+			final URL templateUrl = ThymeleafExceptionUtils.class.getClassLoader().getResource(this.getFileName());
+
+			if (templateUrl == null) {
+				classFullPath = "";
+			}
+			else {
+				if (templateUrl.getProtocol().equals("jar")) {
+					classFullPath = templateUrl.getPath().replaceFirst("\\/target.*classes\\!", "/src/main/resources").substring(5);
+				}
+				else {
+					classFullPath = templateUrl.getPath();
+				}
+			}
+		}
+
+		return Paths.get(classFullPath);
 	}
 
-	enum FileType {
-		JAVA, HTML
-	}
 }

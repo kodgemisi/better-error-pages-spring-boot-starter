@@ -1,0 +1,4 @@
+whole line; template path; line number
+Caused by: org.attoparser.ParseException: Could not parse as each: "item : ${user" (template: "products/syntaxError" - line 3, col 5); products/syntaxError; 3
+Caused by: org.thymeleaf.exceptions.TemplateProcessingException: Could not parse as each: "item : ${user" (template: "products/syntaxError" - line 3, col 5); products/syntaxError; 3
+Caused by: org.attoparser.ParseException: Exception evaluating SpringEL expression: "user.products" (template: "products/missingProperty" - line 3, col 5); products/missingProperty; 3

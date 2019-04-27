@@ -1,5 +1,7 @@
 # Better Error Pages
 
+[![Build Status](https://travis-ci.com/kodgemisi/better-error-pages-spring-boot-starter.svg?branch=master)](https://travis-ci.com/kodgemisi/better-error-pages-spring-boot-starter)
+
 This is a `Spring Boot Starter` project which provides Rails like error pages for Spring Boot applications for development environments.
 
 ![Screenshot](docs/screenshot.png)

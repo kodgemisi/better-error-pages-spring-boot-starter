@@ -1,3 +1,4 @@
 target package, whole line, fully qualified class name, package name, class name, file name, line number
 com.kodgemisi, "\tat com.kodgemisi.bettererrorpagesdemo.DemoClass.error(NonPublicController.java:29)\n", com.kodgemisi.bettererrorpagesdemo.DemoClass, com.kodgemisi.bettererrorpagesdemo, DemoClass, NonPublicController.java, 29
 com.kodgemisi, "\tat com.kodgemisi.bettererrorpagesdemo.NonPublicController.demo(NonPublicController.java:18)\n", com.kodgemisi.bettererrorpagesdemo.NonPublicController, com.kodgemisi.bettererrorpagesdemo,NonPublicController, NonPublicController.java, 18
+com.kodgemisi, "at com.kodgemisi.summer.components.core.FormModelProcessor$1.visit(FormModelProcessor.java:93) ~[classes/:na]", com.kodgemisi.summer.components.core.FormModelProcessor, com.kodgemisi.summer.components.core, FormModelProcessor, FormModelProcessor.java, 93

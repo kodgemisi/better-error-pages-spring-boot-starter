@@ -86,6 +86,12 @@ the Mozilla Public License, v. 2.0.
         a:hover {
             color: #C52F24;
         }
+        a.disabled {
+            font-weight: normal;
+            color: darkgray;
+            text-decoration: line-through;
+            cursor: not-allowed;
+        }
 
         footer {
             text-align: center;
@@ -205,22 +211,27 @@ the Mozilla Public License, v. 2.0.
         }
         #copyMessageWrapper.show {
             opacity: 1;
+            display: block;
         }
         #copyMessageWrapper.hide {
             opacity: 0;
-            animation: fadeInFromNone 0.5s ease-out;
+            z-index: -1;
+            animation: fadeOutAndGoBack 0.5s ease-out;
         }
-        @keyframes fadeInFromNone {
+        @keyframes fadeOutAndGoBack {
             0% {
                 opacity: 1;
+                z-index: 3;
             }
 
-            1% {
-                opacity: 1;
+            99% {
+                opacity: 0;
+                z-index: 3;
             }
 
             100% {
                 opacity: 0;
+                z-index: -1;
             }
         }
 
@@ -268,9 +279,9 @@ the Mozilla Public License, v. 2.0.
 <main>
     <h2 th:text="${message}">Error message</h2>
 
-    <th:block th:if="${trace != null && !trace.isEmpty()}" th:with="errorContextList=${thymeleafExceptionUtils.getListOfErrorContext(trace)}">
+    <th:block th:if="${errorContextList != null && !errorContextList.isEmpty()}">
 
-        <th:block th:if="${!errorContextList.empty}" th:each="errorContext, iterStat : ${errorContextList}">
+        <th:block th:unless="${errorContextList.empty}" th:each="errorContext, iterStat : ${errorContextList}">
 
             <section class="code-editor" th:classappend="${iterStat.first}? 'show'" th:id="${errorContext.id}" th:firstLineNumber="${errorContext.firstLineNumber}" th:errorLineNumber="${errorContext.errorLineNumber}" th:fileType="${errorContext.fileType}">
                 <p class="code-editor-title">
@@ -318,7 +329,7 @@ the Mozilla Public License, v. 2.0.
             <a href="#cause" style="font-weight: normal;" onclick="return scrollToCause()">Go to root cause</a>
             <a href="#" style="font-weight: normal;" onclick="toggleFullTrace();return false;">Toggle full trace</a>
         </h3>
-        <pre id="trace" class="compact" th:utext="${thymeleafExceptionUtils.styledTrace(trace)}"></pre>
+        <pre id="trace" class="compact" th:utext="${styledTrace}"></pre>
 
         <!--/* Highlight root cause in trace if exists */-->
         <script>
@@ -337,6 +348,11 @@ the Mozilla Public License, v. 2.0.
                     range.insertNode(span);
                     window.getSelection().empty();
                     window.scrollTo(0, 0);
+                }
+                else {
+                    let element = document.querySelector('[href="#cause"]');
+                    element.classList.add('disabled');
+                    element.setAttribute('title', 'There is no root cause for this exception');
                 }
             }
         </script>
@@ -361,7 +377,9 @@ the Mozilla Public License, v. 2.0.
                 <tbody>
                     <tr th:each="mapping : ${mappings}" th:object="${mapping}">
                         <td th:text="*{httpVerb}"></td>
-                        <td th:text="*{pattern}" th:pattern="*{pattern}"></td>
+                        <td>
+                            <a th:text="*{pattern}" th:href="@{__*{pattern}__}">/some/url</a>
+                        </td>
                         <td th:text="*{combinedMethodName}"></td>
                     </tr>
                 </tbody>
@@ -425,7 +443,7 @@ the Mozilla Public License, v. 2.0.
                 </tr>
                 <tr th:each="entry : ${sessionAttributes}">
                     <td th:text="${entry.key}"></td>
-                    <td><div th:text="${thymeleafExceptionUtils.toStringSafe(entry.value)}"></div></td>
+                    <td><div th:text="${T(io.summerframework.bettererrorpages.ErrorPageThymeleafUtils).toStringSafe(entry.value)}"></div></td>
                 </tr>
             </table>
         </div>
@@ -462,7 +480,7 @@ the Mozilla Public License, v. 2.0.
         </div>
     </div>
 
-    <div id="selectionArea" style="color: transparent;position: fixed;top:-100px;"></div>
+    <div id="selectionArea" style="color: transparent;position: fixed;top:-1000px;"></div>
     <div id="copyMessageWrapper">
         <div id="copyMessage">
             Copied to clipboard.<br><span></span>
@@ -495,7 +513,7 @@ the Mozilla Public License, v. 2.0.
     {
         document.querySelectorAll('.own-class').forEach( el => el.onclick = showSourceCode);
         function showSourceCode() {
-            const id = this.textContent.match(/((\w+\.+)+)/)[0].slice(0, - 1)  + this.textContent.match(/:\d+/)[0];
+            const id = this.attributes['source-id'].value;
             document.querySelectorAll('.code-editor.show').forEach(el => el.classList.remove('show'));
             document.getElementById(id).classList.add('show');
             window.scrollTo(0, 0);

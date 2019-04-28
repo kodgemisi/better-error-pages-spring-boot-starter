@@ -23,7 +23,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.context.WebApplicationContext;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(properties = {"better-error-pages.package-name:com.kodgemisi", "logging.level.com.kodgemisi=trace"}, classes = UserConfiguration.class)
+@SpringBootTest(properties = {"better-error-pages.package-name:com.kodgemisi", "logging.level.com.kodgemisi=trace"}, classes = TestConfiguration.class)
 @TestPropertySource(properties = {"spring.profiles.active=dev"})
 @EnableAutoConfiguration
 public class ConfigurationTestForDevProfileTest {
@@ -33,8 +33,8 @@ public class ConfigurationTestForDevProfileTest {
 
 	@Test
 	public void enabledWhenNoExpilicitBetterErrorPagesProfileSet() {
-		ThymeleafExceptionUtils thymeleafExceptionUtils = applicationContext.getBean(ThymeleafExceptionUtils.class);
-		Assert.assertNotNull(thymeleafExceptionUtils);
+		BetterErrorPagesService betterErrorPagesService = applicationContext.getBean(BetterErrorPagesService.class);
+		Assert.assertNotNull(betterErrorPagesService);
 
 		BetterErrorPagesController betterErrorPagesController = applicationContext.getBean(BetterErrorPagesController.class);
 		Assert.assertNotNull(betterErrorPagesController);

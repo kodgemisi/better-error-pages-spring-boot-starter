@@ -39,36 +39,51 @@ class TraceParser {
 
 	List<ErrorContext> getErrorContexts(String trace) {
 
+		// Checking for class file info in trace
 		final Matcher matcher = this.parseTraceForClass(trace);
 		final List<ErrorContext> errorContexts = new ArrayList<>();
 
-		while (matcher.find() && matcher.groupCount() > 0) {
-			errorContexts.add(ErrorContext.extractFromClassMatcher(matcher));
+		while (matcher.find()) {
+
+			final ErrorContext errorContext = ErrorContext.extractFromClassMatcher(matcher);
+
+			if(!errorContexts.contains(errorContext)) {
+				errorContexts.add(errorContext);
+			}
 		}
 
-		if (errorContexts.isEmpty()) {
+		// Checking for template file info in trace
+		final Matcher matcherForTemplateMeta = this.parseTraceForTemplate(trace);
 
-			if(log.isTraceEnabled()) {
-				log.trace("Trying to extract ErrorContexts for a template exception...");
+		if (matcherForTemplateMeta.find()) {
+
+			if(log.isDebugEnabled()) {
+				log.debug("ErrorContext  for a template exception is found.");
 			}
 
-			final Matcher matcherForTemplateMeta = this.parseTraceForTemplate(trace);
-
-			while (matcherForTemplateMeta.find() && matcherForTemplateMeta.groupCount() > 0) {
-
-				if(log.isDebugEnabled()) {
-					log.debug("ErrorContext  for a template exception is found.");
-				}
-
-				errorContexts.add(ErrorContext.extractFromTemplateMatcher(matcherForTemplateMeta));
-				break;//No need to parse the rest as they will yield the same file name for template errors
-			}
+			errorContexts.add(ErrorContext.extractFromTemplateMatcher(matcherForTemplateMeta));
+			//No need to parse the rest as they will yield the same file name for template errors
+			//Hence we are not looping for the remaining findings of 'matcherForTemplateMeta'
 		}
 
 		if(log.isTraceEnabled()) {
 			log.trace("Returning ErrorContexts size {}", errorContexts.size());
 		}
 		return errorContexts;
+	}
+
+	String getMatchedContent(String traceLine) {
+		final Matcher classMatcher = classNameRegexPattern.matcher(traceLine);
+		if(classMatcher.find()) {
+			return classMatcher.group(0);
+		}
+
+		final Matcher templateMatcher = templateNameRegexPattern.matcher(traceLine);
+		if(templateMatcher.find()) {
+			return templateMatcher.group(0);
+		}
+
+		return null;
 	}
 
 	/**

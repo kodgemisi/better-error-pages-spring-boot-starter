@@ -12,17 +12,15 @@
 
 package io.summerframework.bettererrorpages;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Created on April, 2018
@@ -31,58 +29,34 @@ import java.util.Optional;
  */
 @Controller
 @RequestMapping("${server.error.path:${error.path:/error}}")
-public class BetterErrorPagesArchiveController {
+class BetterErrorPagesArchiveController {
 
-	private final ThymeleafExceptionUtils thymeleafExceptionUtils;
+	static final String MODEL_KEY = "BETTER_ERROR_PAGES_ARCHIVED_ATTRIBUTES";
 
-	private final BetterErrorPagesService betterErrorPagesService;
+	private final ArchivedErrorPagesService archivedErrorPagesService;
 
-	protected BetterErrorPagesArchiveController(ThymeleafExceptionUtils thymeleafExceptionUtils, BetterErrorPagesService betterErrorPagesService) {
-		this.thymeleafExceptionUtils = thymeleafExceptionUtils;
-		this.betterErrorPagesService = betterErrorPagesService;
+	protected BetterErrorPagesArchiveController(ArchivedErrorPagesService archivedErrorPagesService) {
+		this.archivedErrorPagesService = archivedErrorPagesService;
 	}
 
 	@GetMapping(value = "/{id}", produces = "text/html")
-	public ModelAndView errorHtml(HttpServletRequest request, HttpServletResponse response, @PathVariable("id") String id) {
-		final HttpStatus status = getStatus(request);
-		response.setStatus(status.value());
+	String errorHtml(HttpServletRequest request, HttpServletResponse response, @PathVariable("id") String id,
+			@Value("${server.error.path:${error.path:/error}}") String errorPath) {
 
-		final Optional<Map<String, Object>> errorAttributesOptional = betterErrorPagesService.getErrorAttributesById(id);
+		final Map<String, Object> errorAttributes = archivedErrorPagesService.getErrorAttributesById(id).orElseThrow(ErrorArchiveNotFoundException::new);
 
-		final Map<String, Object> errorAttributes = errorAttributesOptional.orElseThrow(ErrorArchiveNotFoundException::new);
 		errorAttributes.put("betterErrorPagesTimestampMs", Long.MAX_VALUE);// prevent removal of seen archives
 
-		final Map<String, Object> model = new HashMap<>();
-		model.put("thymeleafExceptionUtils", thymeleafExceptionUtils);
-		model.putAll(errorAttributes);
+		request.setAttribute(MODEL_KEY, errorAttributes);
 
-		return new ModelAndView("better-error-pages", model);
+		return "forward:" + errorPath;
 	}
 
 	@ExceptionHandler(ErrorArchiveNotFoundException.class)
 	String handle404(Model model, HttpServletResponse response) {
-		model.addAttribute("timeout", betterErrorPagesService.getTimeout());
+		model.addAttribute("timeout", archivedErrorPagesService.getTimeout());
 		response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 		return "better-error-pages-404";
-	}
-
-	/**
-	 * From {@link org.springframework.boot.autoconfigure.web.servlet.error.AbstractErrorController#getStatus(javax.servlet.http.HttpServletRequest)}
-	 *
-	 * @param request
-	 * @return
-	 */
-	private HttpStatus getStatus(HttpServletRequest request) {
-		Integer statusCode = (Integer) request.getAttribute("javax.servlet.error.status_code");
-		if (statusCode == null) {
-			return HttpStatus.INTERNAL_SERVER_ERROR;
-		}
-		try {
-			return HttpStatus.valueOf(statusCode);
-		}
-		catch (Exception ex) {
-			return HttpStatus.INTERNAL_SERVER_ERROR;
-		}
 	}
 
 	@ResponseStatus(HttpStatus.NOT_FOUND)

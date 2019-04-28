@@ -40,19 +40,21 @@ class ErrorContext {
 
 	private final FileType fileType;
 
-	private String fullyQualifiedClassName;
+	private final String fullyQualifiedClassName;
 
-	private String packageName;
+	private final String packageName;
 
 	/**
 	 * Class name or template name in the form of "templates/acme/index.html"
 	 */
-	private String className;
+	private final String className;
 
 	/**
 	 * For inner classes and non-public classes their file name is different
 	 */
-	private String fileName;
+	private final String fileName;
+
+	private final String traceLine;
 
 	private int errorLineNumber;
 
@@ -65,7 +67,8 @@ class ErrorContext {
 	@Setter
 	private int firstLineNumber;
 
-	private ErrorContext(String templateName, String errorLineNumber) {
+	private ErrorContext(String traceLine, String templateName, String errorLineNumber) {
+		this.traceLine = traceLine;
 		this.errorLineNumber = Integer.parseInt(errorLineNumber);
 
 		// If the error is in a layout then templateName comes with .html suffix due to non-standard exception reporting of Thymeleaf
@@ -78,7 +81,8 @@ class ErrorContext {
 		this.parseSourceCode();
 	}
 
-	private ErrorContext(String fullyQualifiedClassName, String packageName, String className, String fileName, String errorLineNumber) {
+	private ErrorContext(String traceLine, String fullyQualifiedClassName, String packageName, String className, String fileName, String errorLineNumber) {
+		this.traceLine = traceLine;
 		this.fullyQualifiedClassName = fullyQualifiedClassName;
 		this.packageName = packageName;
 		this.className = className;
@@ -106,11 +110,11 @@ class ErrorContext {
 	 * </pre>
 	 */
 	static ErrorContext extractFromClassMatcher(Matcher matcher) {
-		return new ErrorContext(matcher.group(1), matcher.group(2), matcher.group(3), matcher.group(4), matcher.group(5));
+		return new ErrorContext(matcher.group(0), matcher.group(1), matcher.group(2), matcher.group(3), matcher.group(4), matcher.group(5));
 	}
 
 	static ErrorContext extractFromTemplateMatcher(Matcher matcher) {
-		return new ErrorContext(matcher.group(1), matcher.group(2));
+		return new ErrorContext(matcher.group(0), matcher.group(1), matcher.group(2));
 	}
 
 	private void parseSourceCode() {
@@ -141,15 +145,15 @@ class ErrorContext {
 			this.setSourceCodePath(sourceFilePath.toString());
 		}
 		catch (IOException | ClassNotFoundException e) {
-			if(log.isTraceEnabled()) {
-				log.trace(e.getMessage(), e);
+			if(log.isDebugEnabled()) {
+				log.debug(e.getMessage(), e);
 			}
-			this.setSourceCode("Cannot parse source file, exception is logged.");
+			this.setSourceCode("Cannot parse source file, exception is logged if better error pages logging level is debug.");
 			//TODO add parsing stacktrace to ErrorContext in order to make it easier to report errors via only submitting the produced HTML page.
 		}
 	}
 
-	private Path getSourceFilePath() throws ClassNotFoundException {
+	private Path getSourceFilePath() throws ClassNotFoundException, IOException {
 
 		assert this.fileType != null && this.fullyQualifiedClassName != null && this.className != null
 				&& this.fileName != null : "ErrorContext should be fully initialized before this method is called.";
@@ -186,10 +190,10 @@ class ErrorContext {
 		else {
 
 			// Using classloader to load resource because it searches from the root of classpath even if the class is in some folder
-			final URL templateUrl = ThymeleafExceptionUtils.class.getClassLoader().getResource(this.getFileName());
+			final URL templateUrl = BetterErrorPagesService.class.getClassLoader().getResource(this.getFileName());
 
 			if (templateUrl == null) {
-				classFullPath = "";
+				throw new IOException(this.getFileName() + " cannot be found.");
 			}
 			else {
 				if (templateUrl.getProtocol().equals("jar")) {
@@ -204,4 +208,21 @@ class ErrorContext {
 		return Paths.get(classFullPath);
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+
+		ErrorContext that = (ErrorContext) o;
+
+		return this.getId().equals(that.getId());
+
+	}
+
+	@Override
+	public int hashCode() {
+		return this.getId().hashCode();
+	}
 }

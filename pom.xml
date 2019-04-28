@@ -12,7 +12,7 @@
 
     <groupId>io.summerframework</groupId>
     <artifactId>better-error-pages-spring-boot-starter</artifactId>
-    <version>0.5.0</version>
+    <version>0.5.1</version>
     <packaging>jar</packaging>
 
     <name>better-error-pages-spring-boot-starter</name>

@@ -31,7 +31,14 @@ class TraceParser {
 
 	private final Pattern classNameRegexPattern;
 
-	private final Pattern templateNameRegexPattern = Pattern.compile("\\(template: \"(.+)\" - line (\\d+), col .+\\)");
+	/**
+	 * <p>{@code (?:.+\[)} and {@code *\} parts are to match optional brackets ({@literal [} {@literal ]})</p>
+	 * <br>
+	 * <p>Template names are sometimes in form <br>
+	 *  {@code (template: "class path resource [templates/index.html]" - line 2, col 100)} <br>and sometimes<br>
+	 * 	{@code (template: "products/syntaxError" - line 3, col 5)}</p>
+	 */
+	private final Pattern templateNameRegexPattern = Pattern.compile("\\(template: \"(?:.+\\[){0,1}(.+?)]*\" - line (\\d+), col .+\\)");
 
 	TraceParser(String packageName) {
 		classNameRegexPattern = Pattern.compile("at ((" + packageName + "[a-z0-9\\.]*)\\.([A-Z]\\w*)).*\\((.+):(\\d+)\\)");

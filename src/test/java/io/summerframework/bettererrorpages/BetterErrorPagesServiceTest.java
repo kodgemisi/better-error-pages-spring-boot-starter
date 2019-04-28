@@ -24,16 +24,16 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class ThymeleafExceptionUtilsTest {
+class BetterErrorPagesServiceTest {
 
 	private static final String PACKAGE_NAME = "com.kodgemisi";
 
-	private final ThymeleafExceptionUtils thymeleafExceptionUtils = new ThymeleafExceptionUtils(PACKAGE_NAME);
+	private final BetterErrorPagesService betterErrorPagesService = new BetterErrorPagesService(PACKAGE_NAME);
 
 	@Test
 	void styledTraceTest() {
 		final String sampleTrace = Utils.readSampleFile("sampleTrace.txt");
-		final String styledTrace = thymeleafExceptionUtils.styledTrace(sampleTrace);
+		final String styledTrace = betterErrorPagesService.styledTrace(sampleTrace);
 
 		assertTrue(styledTrace.contains(
 				"<span class=\"own-class\">\tat com.kodgemisi.bettererrorpagesdemo.DemoClass.error(NonPublicController.java:29)</span>"));
@@ -50,7 +50,7 @@ class ThymeleafExceptionUtilsTest {
 
 		final String sampleTrace = Utils.readSampleFile("sampleTrace.txt");
 
-		final List<ErrorContext> errorContexts = thymeleafExceptionUtils.getListOfErrorContext(sampleTrace);
+		final List<ErrorContext> errorContexts = betterErrorPagesService.getListOfErrorContext(sampleTrace);
 		assertEquals(errorContexts.size(), 4);
 	}
 
@@ -60,7 +60,7 @@ class ThymeleafExceptionUtilsTest {
 	@ValueSource(strings = { " ", "   ", "\t", "\n" })
 	void getErrorContextsWithEmptyParameter(String blankTrace) {
 
-		final List<ErrorContext> emptyErrorContexts = thymeleafExceptionUtils.getListOfErrorContext(blankTrace);
+		final List<ErrorContext> emptyErrorContexts = betterErrorPagesService.getListOfErrorContext(blankTrace);
 		assertEquals(emptyErrorContexts, Collections.emptyList());
 	}
 

@@ -33,8 +33,8 @@ public class ConfigurationTestForDevProfileTest {
 
 	@Test
 	public void enabledWhenNoExpilicitBetterErrorPagesProfileSet() {
-		ThymeleafExceptionUtils thymeleafExceptionUtils = applicationContext.getBean(ThymeleafExceptionUtils.class);
-		Assert.assertNotNull(thymeleafExceptionUtils);
+		BetterErrorPagesService betterErrorPagesService = applicationContext.getBean(BetterErrorPagesService.class);
+		Assert.assertNotNull(betterErrorPagesService);
 
 		BetterErrorPagesController betterErrorPagesController = applicationContext.getBean(BetterErrorPagesController.class);
 		Assert.assertNotNull(betterErrorPagesController);

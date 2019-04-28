@@ -12,57 +12,112 @@
 
 package io.summerframework.bettererrorpages;
 
-import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.lang.NonNull;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import org.unbescape.html.HtmlEscape;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * Created on May, 2018
+ * Instances of this class are thread-safe.
+ * <p>
+ * Created on April, 2018
  *
  * @author destan
  */
+@Slf4j
 class BetterErrorPagesService {
 
-	private final long timeout;
+	private static final String SPAN_START = "<span class=\"own-class\" source-id=\"SI\">";
 
-	private final Map<String, Map<String, Object>> errorArchive;
+	private static final String SPAN_END = "</span>";
 
-	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+	private static final String ERROR_CONTEXT_MAP_KEY = "ERROR_CONTEXT_MAP";
 
-	BetterErrorPagesService(long timeout) {
-		this.timeout = timeout;
-		this.errorArchive = Collections.synchronizedMap(new HashMap<>());//TODO put a limit like in FIFO fixed size queues
+	private final TraceParser traceParser;
 
-		final Runnable clearJob = this::clearOldErrors;
-		scheduler.scheduleAtFixedRate(clearJob, this.timeout, this.timeout, TimeUnit.MILLISECONDS);
+	protected BetterErrorPagesService(final String packageName) {
+		this.traceParser = new TraceParser(packageName);
 	}
 
-	void putErrorTrace(String errorId, Map<String, Object> errorAttributes) {
-		errorAttributes.put("archived", true);
-		errorAttributes.put("betterErrorPagesErrorId", errorId);
-		errorAttributes.put("betterErrorPagesTimestampMs", System.currentTimeMillis());
-		errorArchive.put(errorId, errorAttributes);
+	private static HttpServletRequest getCurrentHttpRequest() {
+		final RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+		if (requestAttributes instanceof ServletRequestAttributes) {
+			return ((ServletRequestAttributes) requestAttributes).getRequest();
+		}
+
+		throw new IllegalStateException("Cannot find ServletRequestAttributes");
 	}
 
-	Optional<Map<String, Object>> getErrorAttributesById(String id) {
-		return Optional.ofNullable(this.errorArchive.get(id));
+	private String decorateTraceLineIfCorrespondingErrorContextExists(String line) {
+
+		final String sourceCodeId = getSourceCodeIdFromTraceLine(line);
+		final String escapedHtml5 = HtmlEscape.escapeHtml5(line);
+
+		if (sourceCodeId == null) {
+			return escapedHtml5;
+		}
+
+		return (SPAN_START.replace("SI", sourceCodeId) + escapedHtml5 + SPAN_END);
 	}
 
-	private void clearOldErrors() {
-		final List<String> idsToBeRemoved = errorArchive.values().stream()
-				.filter(errorAttributes -> (System.currentTimeMillis() - ((Long)errorAttributes.get("betterErrorPagesTimestampMs"))) > timeout)
-				.map(errorAttributes -> errorAttributes.get("betterErrorPagesErrorId").toString())
-				.collect(Collectors.toList());
+	/**
+	 * @param line a single line from an exception trace
+	 * @return corresponding 'code-editor' id in HTML, null if there is no error context for this line.
+	 */
+	private String getSourceCodeIdFromTraceLine(String line) {
 
-		// To keep synchronized behavior of the map we need to use only map's methods to modify map content
-		// That's why we don't use "map.entrySet().removeIf" here
-		idsToBeRemoved.forEach(errorArchive::remove);
+		final String lineAsMapKey = traceParser.getMatchedContent(line);
+
+		if (lineAsMapKey == null) {
+			return null;
+		}
+
+		// This map is created in getListOfErrorContext
+		final Map<String, ErrorContext> errorContextMap = (Map<String, ErrorContext>) getCurrentHttpRequest().getAttribute(ERROR_CONTEXT_MAP_KEY);
+		return errorContextMap.get(lineAsMapKey).getId();
 	}
 
-	@ViewTemplateApi
-	public long getTimeout() {
-		return timeout;
+	/**
+	 * This method must be called after {@link #getListOfErrorContext(String)}.
+	 */
+	String styledTrace(String trace) {
+		if (trace == null) {
+			return null;
+		}
+
+		//@formatter:off
+		return String.join("\n", Arrays.stream(trace.split("\n"))
+												.map(this::decorateTraceLineIfCorrespondingErrorContextExists)
+												.toArray(String[]::new));
+		//@formatter:on
+
 	}
+
+	@NonNull
+	List<ErrorContext> getListOfErrorContext(String trace) {
+
+		if (trace == null || trace.trim().isEmpty()) {
+			log.warn(
+					"Trace is null, this is normal for 404 errors but if error is different and you think there should be a trace please make sure that you have server.error.include-stacktrace=always");
+			return Collections.emptyList();
+		}
+
+		final List<ErrorContext> errorContexts = traceParser.getErrorContexts(trace);
+
+		final Map<String, ErrorContext> map = errorContexts.stream().collect(Collectors.toMap(ErrorContext::getTraceLine, Function.identity()));
+		getCurrentHttpRequest().setAttribute(ERROR_CONTEXT_MAP_KEY, map);
+
+		return errorContexts;
+	}
+
 }

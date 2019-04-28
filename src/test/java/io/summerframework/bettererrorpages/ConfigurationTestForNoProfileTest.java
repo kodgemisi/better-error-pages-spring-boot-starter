@@ -34,8 +34,8 @@ public class ConfigurationTestForNoProfileTest {
 
 	@Test(expected = NoSuchBeanDefinitionException.class)
 	public void notEnabledWhenNoExpilicitBetterErrorPagesProfileSetCheckThymeleafExceptionUtils() {
-		ThymeleafExceptionUtils thymeleafExceptionUtils = applicationContext.getBean(ThymeleafExceptionUtils.class);
-		Assert.assertNotNull(thymeleafExceptionUtils);
+		BetterErrorPagesService betterErrorPagesService = applicationContext.getBean(BetterErrorPagesService.class);
+		Assert.assertNotNull(betterErrorPagesService);
 	}
 
 	@Test(expected = NoSuchBeanDefinitionException.class)

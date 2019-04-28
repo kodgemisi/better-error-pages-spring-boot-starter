@@ -71,27 +71,28 @@ class BetterErrorPagesAutoconfigurer {
 	 *
 	 * @param requestMappingHandlerMapping
 	 * @param errorAttributes autowired
-	 * @param betterErrorPagesService
+	 * @param archivedErrorPagesService
 	 * @param errorPath
 	 * @param requestMappingsHolder
 	 * @return a configured instance of BetterErrorPagesController
 	 */
 	@Bean
-	BetterErrorPagesController betterErrorPagesController(ErrorAttributes errorAttributes, ThymeleafExceptionUtils thymeleafExceptionUtils,
-			BetterErrorPagesService betterErrorPagesService, @Value("${server.error.path:${error.path:/error}}") String errorPath,
+	BetterErrorPagesController betterErrorPagesController(ErrorAttributes errorAttributes, BetterErrorPagesService betterErrorPagesService,
+			ArchivedErrorPagesService archivedErrorPagesService, @Value("${server.error.path:${error.path:/error}}") String errorPath,
 			RequestMappingsHolder requestMappingsHolder) {
 
 		final ErrorProperties errorProperties = this.serverProperties.getError();
 		errorProperties.setIncludeStacktrace(ErrorProperties.IncludeStacktrace.ALWAYS);
 		errorProperties.setIncludeException(true);
 
-		return new BetterErrorPagesController(errorAttributes, errorProperties, errorViewResolvers, thymeleafExceptionUtils, betterErrorPagesService,
+		return new BetterErrorPagesController(errorAttributes, errorProperties, errorViewResolvers, betterErrorPagesService,
+											  archivedErrorPagesService,
 											  requestMappingsHolder, errorPath);
 	}
 
 	@Bean
-	BetterErrorPagesService betterErrorPagesService() {
-		return new BetterErrorPagesService(betterErrorPagesConfigurationProperties.getArchiveTimeout());
+	ArchivedErrorPagesService archivedErrorPagesService() {
+		return new ArchivedErrorPagesService(betterErrorPagesConfigurationProperties.getArchiveTimeout());
 	}
 
 	@Bean
@@ -100,12 +101,12 @@ class BetterErrorPagesAutoconfigurer {
 	}
 
 	@Bean
-	BetterErrorPagesArchiveController betterErrorPagesArchiveController(ThymeleafExceptionUtils thymeleafExceptionUtils, BetterErrorPagesService betterErrorPagesService) {
-		return new BetterErrorPagesArchiveController(thymeleafExceptionUtils, betterErrorPagesService);
+	BetterErrorPagesArchiveController betterErrorPagesArchiveController(ArchivedErrorPagesService archivedErrorPagesService) {
+		return new BetterErrorPagesArchiveController(archivedErrorPagesService);
 	}
 
 	@Bean
-	ThymeleafExceptionUtils thymeleafExceptionUtils() {
+	BetterErrorPagesService thymeleafExceptionUtils() {
 
 		String packageName = betterErrorPagesConfigurationProperties.getPackageName();
 
@@ -128,7 +129,7 @@ class BetterErrorPagesAutoconfigurer {
 
 		log.debug("packageName is determined as {}", packageName);
 
-		return new ThymeleafExceptionUtils(packageName);
+		return new BetterErrorPagesService(packageName);
 	}
 
 }

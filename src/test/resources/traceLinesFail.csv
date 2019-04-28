@@ -1,3 +1,4 @@
 target package, whole line
 com.kodgemisi, "\tat org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:193)\n"
 com.kodgemisi, "\tat com.apache.kodgemisi.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:193)\n"
+com.kodgemisi, Caused by: org.attoparser.ParseException: Error during execution of processor 'com.kodgemisi.summer.components.core.FormModelProcessor' (template: "index-with-customization" - line 21, col 13)

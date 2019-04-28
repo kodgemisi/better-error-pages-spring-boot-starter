@@ -23,7 +23,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.context.WebApplicationContext;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(properties = {"better-error-pages.package-name:com.kodgemisi", "logging.level.com.kodgemisi=trace"}, classes = UserConfiguration.class)
+@SpringBootTest(properties = {"better-error-pages.package-name:com.kodgemisi", "logging.level.com.kodgemisi=trace"}, classes = TestConfiguration.class)
 @TestPropertySource(properties = {"spring.profiles.active=abc, foo", "better-error-pages.profiles=bar, foo"})
 @EnableAutoConfiguration
 public class ConfigurationTestForCustomProfileTest {

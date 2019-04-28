@@ -217,19 +217,12 @@ class ErrorContext {
 
 		ErrorContext that = (ErrorContext) o;
 
-		if (errorLineNumber != that.errorLineNumber)
-			return false;
-		if (!packageName.equals(that.packageName))
-			return false;
-		return fileName.equals(that.fileName);
+		return this.getId().equals(that.getId());
 
 	}
 
 	@Override
 	public int hashCode() {
-		int result = packageName.hashCode();
-		result = 31 * result + fileName.hashCode();
-		result = 31 * result + errorLineNumber;
-		return result;
+		return this.getId().hashCode();
 	}
 }

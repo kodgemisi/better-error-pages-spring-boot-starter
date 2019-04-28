@@ -18,10 +18,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class UserConfiguration {
+public class TestConfiguration {
 
 	public static void main(String[] args) {
-		SpringApplication.run(UserConfiguration.class, args);
+		SpringApplication.run(TestConfiguration.class, args);
 	}
 
 	/**

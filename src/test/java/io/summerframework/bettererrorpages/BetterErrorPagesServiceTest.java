@@ -12,7 +12,6 @@
 
 package io.summerframework.bettererrorpages;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.NullSource;
@@ -22,7 +21,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BetterErrorPagesServiceTest {
 
@@ -30,29 +28,29 @@ class BetterErrorPagesServiceTest {
 
 	private final BetterErrorPagesService betterErrorPagesService = new BetterErrorPagesService(PACKAGE_NAME);
 
-	@Test
-	void styledTraceTest() {
-		final String sampleTrace = Utils.readSampleFile("sampleTrace.txt");
-		final String styledTrace = betterErrorPagesService.styledTrace(sampleTrace);
-
-		assertTrue(styledTrace.contains(
-				"<span class=\"own-class\">\tat com.kodgemisi.bettererrorpagesdemo.DemoClass.error(NonPublicController.java:29)</span>"));
-		assertTrue(styledTrace.contains(
-				"<span class=\"own-class\">\tat com.kodgemisi.bettererrorpagesdemo.NonPublicController.demo(NonPublicController.java:18)</span>"));
-		assertTrue(styledTrace.contains(
-				"<span class=\"own-class\">\tat com.kodgemisi.bettererrorpagesdemo.DemoClass2.error(NonPublicController.java:36)</span>"));
-		assertTrue(styledTrace.contains(
-				"<span class=\"own-class\">\tat com.kodgemisi.bettererrorpagesdemo.DemoClass.error(NonPublicController.java:26)</span>"));
-	}
-
-	@Test
-	void getErrorContextsTest() {
-
-		final String sampleTrace = Utils.readSampleFile("sampleTrace.txt");
-
-		final List<ErrorContext> errorContexts = betterErrorPagesService.getListOfErrorContext(sampleTrace);
-		assertEquals(errorContexts.size(), 4);
-	}
+//	@Test
+//	void styledTraceTest() {
+//		final String sampleTrace = Utils.readSampleFile("sampleTrace.txt");
+//		final String styledTrace = betterErrorPagesService.styledTrace(sampleTrace);
+//
+//		assertTrue(styledTrace.contains(
+//				"<span class=\"own-class\">\tat com.kodgemisi.bettererrorpagesdemo.DemoClass.error(NonPublicController.java:29)</span>"));
+//		assertTrue(styledTrace.contains(
+//				"<span class=\"own-class\">\tat com.kodgemisi.bettererrorpagesdemo.NonPublicController.demo(NonPublicController.java:18)</span>"));
+//		assertTrue(styledTrace.contains(
+//				"<span class=\"own-class\">\tat com.kodgemisi.bettererrorpagesdemo.DemoClass2.error(NonPublicController.java:36)</span>"));
+//		assertTrue(styledTrace.contains(
+//				"<span class=\"own-class\">\tat com.kodgemisi.bettererrorpagesdemo.DemoClass.error(NonPublicController.java:26)</span>"));
+//	}
+//
+//	@Test
+//	void getErrorContextsTest() {
+//
+//		final String sampleTrace = Utils.readSampleFile("sampleTrace.txt");
+//
+//		final List<ErrorContext> errorContexts = betterErrorPagesService.getListOfErrorContext(sampleTrace);
+//		assertEquals(errorContexts.size(), 4);
+//	}
 
 	@ParameterizedTest
 	@NullSource

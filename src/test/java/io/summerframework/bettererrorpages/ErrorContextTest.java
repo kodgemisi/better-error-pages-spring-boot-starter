@@ -22,7 +22,7 @@ class ErrorContextTest {
 	@Test
 	void constructorCalledFromExtractFromClassMatcher() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
 
-		final Constructor<ErrorContext> ctor = ErrorContext.class.getDeclaredConstructor(String.class, String.class, String.class, String.class, String.class);
+		final Constructor<ErrorContext> ctor = ErrorContext.class.getDeclaredConstructor(String.class, String.class, String.class, String.class, String.class, String.class);
 		ctor.setAccessible(true);
 
 		final Class<?> clazz = DemoClass.class;
@@ -32,7 +32,7 @@ class ErrorContextTest {
 		final String fileName = "DemoClass.java";
 		final String errorLineNumber = "8";
 
-		final ErrorContext errorContext = ctor.newInstance(fullyQualifiedClassName, packageName, className, fileName, errorLineNumber);
+		final ErrorContext errorContext = ctor.newInstance("full trace", fullyQualifiedClassName, packageName, className, fileName, errorLineNumber);
 
 		assertEquals(8, errorContext.getErrorLineNumber());
 		assertEquals(errorContext.getSourceCodePath(), errorContext.getSourceCodePath());
@@ -45,10 +45,10 @@ class ErrorContextTest {
 	@ValueSource(strings = { "products/list", "products/list.html" })
 	void constructorCalledFromExtractFromTemplateMatcher(String templateName) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
 
-		final Constructor<ErrorContext> ctor = ErrorContext.class.getDeclaredConstructor(String.class, String.class);
+		final Constructor<ErrorContext> ctor = ErrorContext.class.getDeclaredConstructor(String.class, String.class, String.class);
 		ctor.setAccessible(true);
 
-		final ErrorContext errorContext = ctor.newInstance(templateName, "13");
+		final ErrorContext errorContext = ctor.newInstance("full trace", templateName, "13");
 
 		assertEquals(13, errorContext.getErrorLineNumber());
 		assertEquals("templates/products/list.html", errorContext.getFullyQualifiedClassName());
@@ -66,7 +66,7 @@ class ErrorContextTest {
 		final Method method = ErrorContext.class.getDeclaredMethod("getSourceFilePath");
 		method.setAccessible(true);
 
-		final Constructor<ErrorContext> ctor = ErrorContext.class.getDeclaredConstructor(String.class, String.class, String.class, String.class, String.class);
+		final Constructor<ErrorContext> ctor = ErrorContext.class.getDeclaredConstructor(String.class, String.class, String.class, String.class, String.class, String.class);
 		ctor.setAccessible(true);
 
 		final Class<?> clazz = BetterErrorPagesArchiveController.class;
@@ -76,7 +76,7 @@ class ErrorContextTest {
 		final String fileName = "BetterErrorPagesArchiveController.java";
 		final String errorLineNumber = "52";
 
-		final ErrorContext errorContext = ctor.newInstance(fullyQualifiedClassName, packageName, className, fileName, errorLineNumber);
+		final ErrorContext errorContext = ctor.newInstance("full trace", fullyQualifiedClassName, packageName, className, fileName, errorLineNumber);
 
 		method.invoke(errorContext);
 
@@ -89,7 +89,7 @@ class ErrorContextTest {
 		final Method method = ErrorContext.class.getDeclaredMethod("getSourceFilePath");
 		method.setAccessible(true);
 
-		final Constructor<ErrorContext> ctor = ErrorContext.class.getDeclaredConstructor(String.class, String.class, String.class, String.class, String.class);
+		final Constructor<ErrorContext> ctor = ErrorContext.class.getDeclaredConstructor(String.class, String.class, String.class, String.class, String.class, String.class);
 		ctor.setAccessible(true);
 
 		final Class<?> clazz = DemoClass.class;
@@ -99,7 +99,7 @@ class ErrorContextTest {
 		final String fileName = "DemoClass.java";
 		final String errorLineNumber = "8";
 
-		final ErrorContext errorContext = ctor.newInstance(fullyQualifiedClassName, packageName, className, fileName, errorLineNumber);
+		final ErrorContext errorContext = ctor.newInstance("full trace", fullyQualifiedClassName, packageName, className, fileName, errorLineNumber);
 
 		method.invoke(errorContext);
 

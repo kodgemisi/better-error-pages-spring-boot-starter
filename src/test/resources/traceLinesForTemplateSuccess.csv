@@ -3,3 +3,4 @@ Caused by: org.attoparser.ParseException: Could not parse as each: "item : ${use
 Caused by: org.thymeleaf.exceptions.TemplateProcessingException: Could not parse as each: "item : ${user" (template: "products/syntaxError" - line 3, col 5); products/syntaxError; 3
 Caused by: org.attoparser.ParseException: Exception evaluating SpringEL expression: "user.products" (template: "products/missingProperty" - line 3, col 5); products/missingProperty; 3
 org.thymeleaf.exceptions.TemplateInputException: An error happened during template parsing (template: "class path resource [templates/index.html]" - line 2, col 100); templates/index.html; 2
+Caused by: org.attoparser.ParseException: Exception evaluating SpringEL expression: "username" (template: "layouts/default" - line 17, col 22); layouts/default; 17

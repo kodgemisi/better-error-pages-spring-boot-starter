@@ -42,7 +42,7 @@ class ErrorContextTest {
 	}
 
 	@ParameterizedTest
-	@ValueSource(strings = { "products/list", "products/list.html" })
+	@ValueSource(strings = { "products/list", "products/list.html", "templates/products/list", "templates/products/list.html" })
 	void constructorCalledFromExtractFromTemplateMatcher(String templateName) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
 
 		final Constructor<ErrorContext> ctor = ErrorContext.class.getDeclaredConstructor(String.class, String.class, String.class);

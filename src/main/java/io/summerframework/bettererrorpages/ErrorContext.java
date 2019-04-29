@@ -72,7 +72,14 @@ class ErrorContext {
 		this.errorLineNumber = Integer.parseInt(errorLineNumber);
 
 		// If the error is in a layout then templateName comes with .html suffix due to non-standard exception reporting of Thymeleaf
-		this.fileName = templateName.endsWith(TEMPLATES_SUFFIX) ? TEMPLATES_PATH + templateName : TEMPLATES_PATH + templateName + TEMPLATES_SUFFIX;
+		// Sample layout trace: (template: "layouts/default" - line 17, col 22)
+		// However when the error from a custom Thymeleaf component (like a fragment or a Thymeleaf processor) then there is also the prefix.
+		// Sample: (template: "class path resource [templates/index.html]" - line 2, col 100)
+		// Hence we should check if it already exists before adding the prefix AND the suffix.
+		final String calculatedSuffix = templateName.endsWith(TEMPLATES_SUFFIX) ? "" : TEMPLATES_SUFFIX;
+		final String calculatedPrefix = templateName.startsWith(TEMPLATES_PATH) ? "" : TEMPLATES_PATH;
+		this.fileName = calculatedPrefix + templateName + calculatedSuffix;
+
 		this.packageName = "";
 		this.className = fileName;
 		this.fullyQualifiedClassName = this.fileName;

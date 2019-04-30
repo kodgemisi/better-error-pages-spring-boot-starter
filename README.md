@@ -25,6 +25,8 @@ Note that demo page is a Heroku app so it may be sleeping when you first open th
 Just add the dependency to your maven/gradle of your Spring Boot application then it will autoconfigure itself and
 _Better Error Pages_ will be available if your active profiles includes `dev` or `development`.
 
+It is assumed that you are already using **thymeleaf** as template engine.
+
 **Adding the dependency to your project**
 
 ```xml

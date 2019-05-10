@@ -20,6 +20,10 @@
     <description>Rails like error pages for Spring Boot applications</description>
     <url>https://github.com/kodgemisi/better-error-pages</url>
 
+    <scm>
+        <url>https://github.com/kodgemisi/better-error-pages</url>
+    </scm>
+
     <inceptionYear>2018</inceptionYear>
 
     <properties>
@@ -35,6 +39,10 @@
         <org-powermock.version>2.0.2</org-powermock.version>
         <jacoco-maven-plugin.version>0.8.3</jacoco-maven-plugin.version>
         <commons-io.version>2.6</commons-io.version>
+        <asciidoctor-maven-plugin.version>1.5.8</asciidoctor-maven-plugin.version>
+
+        <!-- https://github.com/asciidoctor/asciidoctor-maven-plugin#add-version-and-build-date-to-the-header -->
+        <maven.build.timestamp.format>yyyy-MM-dd</maven.build.timestamp.format>
     </properties>
 
     <dependencies>
@@ -161,6 +169,42 @@
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                         </manifest>
                     </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.asciidoctor</groupId>
+                <artifactId>asciidoctor-maven-plugin</artifactId>
+                <version>${asciidoctor-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>output-html</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>process-asciidoc</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <!-- We add `images/` prefix manually in `readme.adoc` in order to show images on
+                    Github's project page where readme is parsed by Github and {imagesdir} is not available. -->
+                    <imagesDir>./</imagesDir>
+                    <backend>html5</backend>
+                    <sourceDirectory>${basedir}</sourceDirectory>
+                    <sourceDocumentName>README.adoc</sourceDocumentName>
+                    <outputDirectory>${basedir}/docs</outputDirectory>
+                    <outputFile>index.html</outputFile>
+                    <resources>
+                        <resource>
+                            <directory>images</directory>
+                            <targetPath>images</targetPath>
+                        </resource>
+                    </resources>
+
+                    <attributes>
+                        <revnumber>${project.version}</revnumber>
+                        <scmurl>${project.scm.url}</scmurl>
+                        <blogurl>${project.organization.url}</blogurl>
+                    </attributes>
                 </configuration>
             </plugin>
         </plugins>

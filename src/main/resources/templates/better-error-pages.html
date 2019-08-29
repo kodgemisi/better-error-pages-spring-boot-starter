@@ -378,7 +378,7 @@ the Mozilla Public License, v. 2.0.
                     <tr th:each="mapping : ${mappings}" th:object="${mapping}">
                         <td th:text="*{httpVerb}"></td>
                         <td>
-                            <a th:text="*{pattern}" th:href="@{__*{pattern}__}">/some/url</a>
+                            <a th:text="*{pattern}" th:href="@{'__*{pattern}__'}">/some/url</a>
                         </td>
                         <td th:text="*{combinedMethodName}"></td>
                     </tr>

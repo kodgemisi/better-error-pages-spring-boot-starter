@@ -38,7 +38,7 @@
 
         <org-powermock.version>2.0.2</org-powermock.version>
         <jacoco-maven-plugin.version>0.8.3</jacoco-maven-plugin.version>
-        <commons-io.version>2.6</commons-io.version>
+        <commons-io.version>2.7</commons-io.version>
         <asciidoctor-maven-plugin.version>1.5.8</asciidoctor-maven-plugin.version>
 
         <!-- https://github.com/asciidoctor/asciidoctor-maven-plugin#add-version-and-build-date-to-the-header -->
